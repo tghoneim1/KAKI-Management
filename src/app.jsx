@@ -268,12 +268,46 @@ export default function App(){
 
   // Auto-sync every 10 seconds
   useEffect(()=>{
+    // Request notification permission on load
+    if("Notification" in window && Notification.permission==="default"){
+      Notification.requestPermission();
+    }
+
     const id=setInterval(async()=>{
       const d=await loadDB();
+      // Check for new orders and notify
+      if(d.orders && db.orders){
+        const prevIds=new Set(db.orders.map(o=>o.id));
+        const newOrders=d.orders.filter(o=>!prevIds.has(o.id)&&o.status==="جديد");
+        newOrders.forEach(o=>{
+          if("Notification" in window && Notification.permission==="granted"){
+            new Notification("🐔 طلب جديد — كاكي",{
+              body:`${o.client} — ج.م ${o.total}`,
+              icon:"/favicon.svg",
+              badge:"/favicon.svg",
+              tag:o.id,
+              requireInteraction:true,
+            });
+            // Play sound
+            try{
+              const ctx=new AudioContext();
+              const osc=ctx.createOscillator();
+              const gain=ctx.createGain();
+              osc.connect(gain);gain.connect(ctx.destination);
+              osc.frequency.setValueAtTime(880,ctx.currentTime);
+              osc.frequency.setValueAtTime(660,ctx.currentTime+0.1);
+              osc.frequency.setValueAtTime(880,ctx.currentTime+0.2);
+              gain.gain.setValueAtTime(0.3,ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+              osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.5);
+            }catch{}
+          }
+        });
+      }
       setDb(d);setLastSync(Date.now());
     },10000);
     return()=>clearInterval(id);
-  },[]);
+  },[db.orders]);
   const [view,setView]=useState("orders");
   const [toast,setToast]=useState(null);
 
@@ -296,6 +330,7 @@ export default function App(){
   const [expClient,setExpClient]=useState(null);
   const [fSt,setFSt]=useState("الكل");
   const [cSearch,setCSearch]=useState("");
+  const [lang,setLang]=useState("AR"); // AR or EN
   // Price editing state
   const [priceEdits,setPriceEdits]=useState({});
   const [priceSaved,setPriceSaved]=useState(false);
@@ -505,7 +540,7 @@ export default function App(){
 
   // ── MAIN APP ──
   return(
-    <div style={{fontFamily:"'Cairo',sans-serif",minHeight:"100vh",background:BG,color:TXT,direction:"rtl",maxWidth:480,margin:"0 auto"}}>
+    <div style={{fontFamily:"'Cairo',sans-serif",minHeight:"100vh",background:BG,color:TXT,direction:lang==="EN"?"ltr":"rtl",maxWidth:480,margin:"0 auto"}}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');*{box-sizing:border-box}body{margin:0;background:${BG}}input::placeholder,textarea::placeholder{color:#374151}select{color:${TXT};font-family:'Cairo',sans-serif;background:${BG}}.fd{animation:fd .2s ease}@keyframes fd{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.pl{animation:pl 1s infinite}@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
 
       {toast&&<div style={{position:"fixed",top:12,left:"50%",transform:"translateX(-50%)",background:toast.type==="err"?"#dc2626":"#059669",color:"#fff",borderRadius:12,padding:"10px 20px",fontWeight:700,fontSize:14,zIndex:9999,boxShadow:"0 4px 20px rgba(0,0,0,.5)",fontFamily:"'Cairo',sans-serif",whiteSpace:"nowrap"}}>{toast.msg}</div>}
@@ -524,8 +559,26 @@ export default function App(){
             <span style={{fontSize:12}}>{ro.emoji}</span>
             <span style={{fontSize:11,fontWeight:700,color:ro.color}}>{ro.label}</span>
           </div>
-          <button onClick={()=>{setSyncing(true);loadDB().then(d=>{setDb(d);setLastSync(Date.now());setSyncing(false);});}} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:syncing?"#f59e0b":"#fff",fontSize:16}}>⟳</button>
-          <button onClick={()=>{setRole(null);setPinScr(true);setPinTgt(null);}} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:"#fff",fontSize:11,fontFamily:"'Cairo',sans-serif"}}>خروج</button>
+          <button onClick={()=>{
+            if("Notification" in window){
+              Notification.requestPermission().then(p=>{
+                if(p==="granted") T("🔔 الإشعارات مفعلة!");
+                else T("❌ يرجى السماح بالإشعارات من إعدادات المتصفح","err");
+              });
+            }
+          }} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",fontSize:16}} title="تفعيل الإشعارات">
+            {"Notification" in window && Notification.permission==="granted"?"🔔":"🔕"}
+          </button>
+          {/* EN/AR Toggle */}
+          <div style={{display:"flex",alignItems:"center",gap:4}}>
+            <span style={{fontSize:9,fontWeight:800,color:lang==="AR"?"#fff":"rgba(255,255,255,.5)"}}>AR</span>
+            <div onClick={()=>setLang(l=>l==="AR"?"EN":"AR")}
+              style={{width:36,height:20,borderRadius:10,background:lang==="EN"?"#10b981":"rgba(0,0,0,.3)",cursor:"pointer",position:"relative",transition:"background .3s"}}>
+              <div style={{position:"absolute",top:2,left:lang==="EN"?16:2,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left .3s"}}/>
+            </div>
+            <span style={{fontSize:9,fontWeight:800,color:lang==="EN"?"#fff":"rgba(255,255,255,.5)"}}>EN</span>
+          </div>
+          <button onClick={()=>{setRole(null);setPinScr(true);setPinTgt(null);}} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:"#fff",fontSize:11,fontFamily:"'Cairo',sans-serif"}}>{lang==="EN"?"Logout":"خروج"}</button>
         </div>
       </div>
 
@@ -852,6 +905,20 @@ export default function App(){
                     )}
                     {order.paymentMethod&&<div style={{marginTop:8,fontSize:13,color:"#10b981",fontWeight:700}}>✅ تم الدفع بـ {order.paymentMethod}</div>}
                     {order.confirmedAt&&<div style={{marginTop:4,fontSize:11,color:"#10b981"}}>✅ تم التأكيد المزدوج — {new Date(order.confirmedAt).toLocaleTimeString("ar-EG")}</div>}
+
+                    {/* Delete order — manager only */}
+                    {role==="manager"&&(
+                      <button onClick={e=>{
+                        e.stopPropagation();
+                        if(window.confirm(`هل أنت متأكد من مسح الطلب ${order.id}؟`)){
+                          mutate(d=>({...d,orders:d.orders.filter(o=>o.id!==order.id)}));
+                          setExpOrder(null);
+                          T("🗑️ تم مسح الطلب");
+                        }
+                      }} style={{...css.sm("#ef4444"),width:"100%",marginTop:12,display:"block",textAlign:"center",padding:"8px"}}>
+                        🗑️ مسح الطلب
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
