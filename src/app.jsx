@@ -932,7 +932,37 @@ export default function App(){
         {/* ══ CLIENTS ══ */}
         {view==="clients"&&(
           <div className="fd">
-            <input style={{...css.inp,marginBottom:12}} placeholder="🔍 ابحث بالاسم أو رقم العضوية أو الهاتف..." value={cSearch} onChange={e=>setCSearch(e.target.value)}/>
+            <input style={{...css.inp,marginBottom:8}} placeholder="🔍 ابحث بالاسم أو رقم العضوية أو الهاتف..." value={cSearch} onChange={e=>setCSearch(e.target.value)}/>
+
+            {/* Manager: fix duplicate member IDs */}
+            {role==="manager"&&(()=>{
+              const ids=db.clients.map(c=>c.memberId).filter(Boolean);
+              const hasDups=ids.length!==new Set(ids).size;
+              return hasDups?(
+                <button onClick={()=>{
+                  if(window.confirm("يوجد أرقام عضوية مكررة. هل تريد إصلاحها؟")){
+                    let counter=1;
+                    const usedIds=new Set();
+                    const fixed=db.clients.map(c=>{
+                      if(!c.memberId||usedIds.has(c.memberId)){
+                        while(usedIds.has(`MBR-${String(counter).padStart(3,"0")}`)) counter++;
+                        const newId=`MBR-${String(counter).padStart(3,"0")}`;
+                        usedIds.add(newId);
+                        counter++;
+                        return{...c,memberId:newId};
+                      }
+                      usedIds.add(c.memberId);
+                      return c;
+                    });
+                    mutate(d=>({...d,clients:fixed}));
+                    T("✅ تم إصلاح أرقام العضوية");
+                  }
+                }} style={{...css.btn("#ef4444","#fff"),width:"100%",marginBottom:12}}>
+                  ⚠️ يوجد أرقام مكررة — اضغط لإصلاح
+                </button>
+              ):null;
+            })()}
+
             {filtClients.length===0&&<div style={{textAlign:"center",padding:"30px",color:SUB}}><div style={{fontSize:40}}>👤</div><div style={{marginTop:8}}>لا يوجد عملاء</div></div>}
             {[...filtClients].sort((a,b)=>(b.totalSpent||0)-(a.totalSpent||0)).map(c=>{
               // Calculate real stats from actual orders
