@@ -86,7 +86,10 @@ let _memberNum=0;
 const genMemberId=clients=>{
   const nums=clients.map(c=>parseInt((c.memberId||"MBR-000").split("-")[1]||0));
   const max=nums.length?Math.max(...nums):0;
-  return `MBR-${String(max+1).padStart(3,"0")}`;
+  let next=max+1;
+  // Make sure it doesn't duplicate an existing one
+  while(clients.some(c=>c.memberId===`MBR-${String(next).padStart(3,"0")}`)) next++;
+  return `MBR-${String(next).padStart(3,"0")}`;
 };
 
 const EMPTY={orders:[],clients:[],costs:[],cycle:1,prices:{},pricesByCycle:{},avgWeight:2};
@@ -931,7 +934,12 @@ export default function App(){
           <div className="fd">
             <input style={{...css.inp,marginBottom:12}} placeholder="🔍 ابحث بالاسم أو رقم العضوية أو الهاتف..." value={cSearch} onChange={e=>setCSearch(e.target.value)}/>
             {filtClients.length===0&&<div style={{textAlign:"center",padding:"30px",color:SUB}}><div style={{fontSize:40}}>👤</div><div style={{marginTop:8}}>لا يوجد عملاء</div></div>}
-            {[...filtClients].sort((a,b)=>(b.totalSpent||0)-(a.totalSpent||0)).map(c=>(
+            {[...filtClients].sort((a,b)=>(b.totalSpent||0)-(a.totalSpent||0)).map(c=>{
+              // Calculate real stats from actual orders
+              const realOrders=db.orders.filter(o=>o.clientId===c.id||o.phone===c.phone);
+              const realTotal=realOrders.reduce((s,o)=>s+(o.total||0),0);
+              const realCount=realOrders.length;
+              return(
               <div key={c.id} style={{...css.card,borderColor:expClient===c.id?"#a78bfa":BDR,cursor:"pointer"}} onClick={()=>setExpClient(expClient===c.id?null:c.id)}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -943,9 +951,9 @@ export default function App(){
                     </div>
                   </div>
                   <div style={{textAlign:"left"}}>
-                    <div style={{fontSize:12,color:"#a78bfa",fontWeight:700}}>{c.totalOrders} طلبات</div>
-                    <div style={{fontSize:13,color:"#10b981",fontWeight:900}}>ج.م {c.totalSpent}</div>
-                    <div style={{fontSize:10,color:MUT}}>معدل: ج.م {c.totalOrders?Math.round(c.totalSpent/c.totalOrders):0}/طلب</div>
+                    <div style={{fontSize:12,color:"#a78bfa",fontWeight:700}}>{realCount} طلبات</div>
+                    <div style={{fontSize:13,color:"#10b981",fontWeight:900}}>ج.م {realTotal}</div>
+                    <div style={{fontSize:10,color:MUT}}>معدل: ج.م {realCount?Math.round(realTotal/realCount):0}/طلب</div>
                   </div>
                 </div>
                 {expClient===c.id&&(
@@ -953,9 +961,9 @@ export default function App(){
                     {/* Member stats */}
                     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:10}}>
                       {[
-                        ["🛒 طلبات",c.totalOrders,"#a78bfa"],
-                        ["💰 إجمالي",`ج.م ${c.totalSpent}`,"#10b981"],
-                        ["📊 معدل",`ج.م ${c.totalOrders?Math.round(c.totalSpent/c.totalOrders):0}`,"#f59e0b"],
+                        ["🛒 طلبات",realCount,"#a78bfa"],
+                        ["💰 إجمالي",`ج.م ${realTotal}`,"#10b981"],
+                        ["📊 معدل",`ج.م ${realCount?Math.round(realTotal/realCount):0}`,"#f59e0b"],
                       ].map(([l,v,col])=>(
                         <div key={l} style={{background:BG,borderRadius:8,padding:"7px",textAlign:"center"}}>
                           <div style={{fontSize:12,fontWeight:900,color:col}}>{v}</div>
@@ -1022,10 +1030,24 @@ export default function App(){
                     })()}
 
                     {tabs.includes("new")&&<button onClick={e=>{e.stopPropagation();setForm(f=>({...f,client:c.name,phone:c.phone,address:c.address,notes:c.notes,memberSearch:""}));setMatchedC(c);setMemberHint(c);setOMode("manual");setView("new");T(`📋 ${c.name}`);}} style={{...css.btn("#d97706","#000"),marginTop:0}}>➕ طلب جديد</button>}
+
+                    {/* Manager: reset client stats */}
+                    {role==="manager"&&(
+                      <button onClick={e=>{
+                        e.stopPropagation();
+                        if(window.confirm(`مسح إحصائيات ${c.name}؟ (عدد الطلبات والإجمالي)`)){
+                          mutate(d=>({...d,clients:d.clients.map(cl=>cl.id===c.id?{...cl,totalOrders:0,totalSpent:0}:cl)}));
+                          T("🗑️ تم مسح الإحصائيات");
+                        }
+                      }} style={{...css.btn("#ef4444","#fff"),marginTop:6,width:"100%"}}>
+                        🗑️ مسح الإحصائيات
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
