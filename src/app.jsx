@@ -715,7 +715,7 @@ export default function App(){
                 <div style={{marginRight:"auto",fontWeight:900,fontSize:18,color:ro.color}}>{roleOrders.length}</div>
               </div>
             )}
-            {/* Status filter buttons — role specific */}
+            {/* Status filter buttons — role specific with count badges */}
             {(()=>{
               const roleStatuses={
                 kitchen:  ["الكل","جديد","قيد التحضير"],
@@ -726,11 +726,26 @@ export default function App(){
               const statuses=roleStatuses[role]||["الكل",...ST_FLOW];
               return(
                 <div style={{display:"flex",gap:5,marginBottom:12,overflowX:"auto",paddingBottom:4}}>
-                  {statuses.map(st=>(
-                    <button key={st} onClick={()=>setFSt(st)} style={{...css.sm(fSt===st?(ST_COLOR[st]||"#d97706"):"#1a2035"),border:`1px solid ${fSt===st?(ST_COLOR[st]||"#d97706"):BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px"}}>
-                      {ST_ICON[st]||"📋"} {st}
-                    </button>
-                  ))}
+                  {statuses.map(st=>{
+                    const count=st==="الكل"?roleOrders.length:roleOrders.filter(o=>o.status===st).length;
+                    const active=fSt===st;
+                    const col=ST_COLOR[st]||"#d97706";
+                    return(
+                      <button key={st} onClick={()=>setFSt(st)} style={{...css.sm(active?col:"#1a2035"),border:`1px solid ${active?col:BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
+                        {st}
+                        <span style={{
+                          background:active?"rgba(0,0,0,.25)":col,
+                          color:"#fff",
+                          borderRadius:10,
+                          padding:"1px 7px",
+                          fontSize:12,
+                          fontWeight:900,
+                          minWidth:20,
+                          textAlign:"center",
+                        }}>{count}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               );
             })()}
@@ -964,8 +979,7 @@ export default function App(){
             })()}
 
             {filtClients.length===0&&<div style={{textAlign:"center",padding:"30px",color:SUB}}><div style={{fontSize:40}}>👤</div><div style={{marginTop:8}}>لا يوجد عملاء</div></div>}
-            {[...filtClients].sort((a,b)=>(b.totalSpent||0)-(a.totalSpent||0)).map(c=>{
-              // Calculate real stats from actual orders
+            {[...filtClients].sort((a,b)=>(b.totalSpent||0)-(a.totalSpent||0)).map((c,idx)=>{
               const realOrders=db.orders.filter(o=>o.clientId===c.id||o.phone===c.phone);
               const realTotal=realOrders.reduce((s,o)=>s+(o.total||0),0);
               const realCount=realOrders.length;
