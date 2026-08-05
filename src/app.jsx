@@ -32,11 +32,8 @@ const DEFAULT_PRODUCTS = [
   { id:"fillet",       name:"صدور فيليه ك",         emoji:"🥩", price:390 },
   { id:"wings",        name:"وراك كاملة ك",         emoji:"🍗", price:100 },
   { id:"tips",         name:"دبوس ك",               emoji:"🍖", price:100 },
-  { id:"shish_half",   name:"شيش طاوق ½ك",         emoji:"🍢", price:195 },
   { id:"shish_full",   name:"شيش طاوق ك",          emoji:"🍢", price:390 },
-  { id:"shawarma_half",name:"شاورمة فراخ ½ك",      emoji:"🌯", price:195 },
   { id:"shawarma_full",name:"شاورمة فراخ ك",       emoji:"🌯", price:390 },
-  { id:"liver_giz",    name:"كبد وقوانص ك",        emoji:"🫀", price:80  },
   { id:"liver",        name:"كبدة ك",               emoji:"🫀", price:80  },
   { id:"gizzard",      name:"قوانص ك",             emoji:"🫁", price:70  },
 ];
