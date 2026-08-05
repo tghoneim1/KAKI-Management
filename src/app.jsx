@@ -333,7 +333,9 @@ export default function App(){
   const [expClient,setExpClient]=useState(null);
   const [fSt,setFSt]=useState("الكل");
   const [cSearch,setCSearch]=useState("");
-  const [lang,setLang]=useState("AR"); // AR or EN
+  const [lang,setLang]=useState("AR");
+  const [scaleWeights,setScaleWeights]=useState({});  // {orderId_itemId: weight}
+  const [scanningFor,setScanningFor]=useState(null);  // orderId being scanned
   // Price editing state
   const [priceEdits,setPriceEdits]=useState({});
   const [priceSaved,setPriceSaved]=useState(false);
@@ -406,6 +408,80 @@ export default function App(){
   const advance=id=>{mutate(d=>({...d,orders:d.orders.map(o=>{if(o.id!==id)return o;const i=ST_FLOW.indexOf(o.status);return i<ST_FLOW.length-1?{...o,status:ST_FLOW[i+1]}:o;})}));T("✅ تم التحديث");};
   const assignDel=(id,svc)=>{mutate(d=>({...d,orders:d.orders.map(o=>o.id===id?{...o,deliveryService:svc}:o)}));T(`🛵 ${svc}`);};
   const pay=(id,m)=>{mutate(d=>({...d,orders:d.orders.map(o=>o.id===id?{...o,paymentMethod:m,status:"تم الدفع"}:o)}));setExpOrder(null);T("💰 تم الدفع");};
+
+  // ── Scale / Barcode helpers ────────────────────────────────────
+  // Parse U·POS / Egyptian price-embedded barcode (EAN-13 starting with 2)
+  const parseScaleBarcode=(barcode)=>{
+    const b=barcode.replace(/\D/g,"");
+    if(b.length===13&&b.startsWith("2")){
+      // Format: 2 + 5-digit item code + 5-digit weight (grams) + check digit
+      const weightG=parseInt(b.slice(7,12));
+      const weightKg=weightG/1000;
+      const itemCode=b.slice(1,6);
+      return{weightKg:weightKg.toFixed(3),itemCode,raw:b};
+    }
+    return null;
+  };
+
+  // Start camera barcode scan for an order
+  const startScan=async(orderId)=>{
+    setScanningFor(orderId);
+    if(!("BarcodeDetector" in window)){
+      // Fallback: manual barcode entry
+      const code=window.prompt("أدخل الباركود يدوياً (13 رقم):");
+      if(code){
+        const parsed=parseScaleBarcode(code);
+        if(parsed){
+          T(`✅ وزن: ${parsed.weightKg} كج`);
+          setScaleWeights(p=>({...p,[orderId]:parsed.weightKg}));
+        }else{T("⚠️ باركود غير صحيح");}
+      }
+      setScanningFor(null);
+      return;
+    }
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+      const video=document.createElement("video");
+      video.srcObject=stream;
+      video.play();
+      const detector=new BarcodeDetector({formats:["ean_13","ean_8"]});
+      let found=false;
+      const scan=async()=>{
+        if(found) return;
+        try{
+          const codes=await detector.detect(video);
+          if(codes.length>0){
+            found=true;
+            stream.getTracks().forEach(t=>t.stop());
+            const parsed=parseScaleBarcode(codes[0].rawValue);
+            if(parsed){
+              T(`✅ وزن: ${parsed.weightKg} كج`);
+              setScaleWeights(p=>({...p,[orderId]:parsed.weightKg}));
+            }else{T("⚠️ باركود غير صحيح");}
+            setScanningFor(null);
+          }else{setTimeout(scan,200);}
+        }catch{setTimeout(scan,200);}
+      };
+      setTimeout(scan,500);
+    }catch{
+      T("⚠️ تعذر فتح الكاميرا");
+      setScanningFor(null);
+    }
+  };
+
+  // Calculate final total based on actual weights
+  const calcFinalTotal=(order)=>{
+    if(!order.items) return order.total;
+    const PRICES=db.pricesByCycle?.[`cycle-${db.cycle||1}`]||db.prices||{};
+    let total=0;
+    Object.entries(order.items).forEach(([id,qty])=>{
+      const wKey=`${order.id}_${id}`;
+      const weight=parseFloat(scaleWeights[wKey]||scaleWeights[order.id]||qty);
+      const price=PRICES[id]||0;
+      total+=weight*price;
+    });
+    return Math.round(total);
+  };
 
   const handleWA=async()=>{
     if(!waMsg.trim()){T("الصق رسالة أولاً","err");return;}
@@ -914,6 +990,78 @@ export default function App(){
                       </div>
                     )}
 
+                    {/* ⚖️ Scale — weight entry & barcode scanner */}
+                    {(ro.canPay||role==="manager")&&order.status==="تم التسليم"&&!order.paymentMethod&&order.items&&(
+                      <div style={{marginTop:10,background:"#0d1929",borderRadius:10,padding:"10px 12px",border:"1px solid #1e3a5f"}}>
+                        <div style={{fontSize:12,color:"#60a5fa",fontWeight:700,marginBottom:8}}>⚖️ الميزان — الوزن الفعلي</div>
+
+                        {/* Per-item weight inputs */}
+                        {Object.entries(order.items).filter(([,q])=>q>0).map(([id,qty])=>{
+                          const wKey=`${order.id}_${id}`;
+                          const PRICES=db.pricesByCycle?.[`cycle-${db.cycle||1}`]||db.prices||{};
+                          const price=PRICES[id]||0;
+                          const w=scaleWeights[wKey]||"";
+                          const subtotal=w?Math.round(parseFloat(w)*price):0;
+                          return(
+                            <div key={id} style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+                              <div style={{flex:1,fontSize:11,color:"#94a3b8"}}>{id}</div>
+                              <input
+                                type="number"
+                                step="0.001"
+                                placeholder={`${qty} كج`}
+                                value={w}
+                                onChange={e=>setScaleWeights(p=>({...p,[wKey]:e.target.value}))}
+                                onClick={e=>e.stopPropagation()}
+                                style={{width:80,background:"#1a2035",border:"1px solid #2d4a7a",borderRadius:6,padding:"5px 8px",color:"#fff",fontSize:12,textAlign:"center"}}
+                              />
+                              <div style={{fontSize:11,color:"#f59e0b",fontWeight:700,minWidth:60}}>
+                                {w?`ج.م ${subtotal}`:""}
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* Total with actual weights */}
+                        {Object.keys(order.items||{}).some(id=>scaleWeights[`${order.id}_${id}`])&&(
+                          <div style={{display:"flex",justifyContent:"space-between",borderTop:"1px solid #1e3a5f",paddingTop:6,marginTop:4}}>
+                            <span style={{fontSize:12,color:"#94a3b8"}}>الإجمالي الفعلي</span>
+                            <span style={{fontSize:14,fontWeight:900,color:"#10b981"}}>
+                              ج.م {Object.entries(order.items).filter(([,q])=>q>0).reduce((s,[id])=>{
+                                const wKey=`${order.id}_${id}`;
+                                const w=parseFloat(scaleWeights[wKey]||0);
+                                const price=(db.pricesByCycle?.[`cycle-${db.cycle||1}`]||db.prices||{})[id]||0;
+                                return s+Math.round(w*price);
+                              },0)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Barcode scanner button */}
+                        <div style={{display:"flex",gap:6,marginTop:8}}>
+                          <button onClick={e=>{e.stopPropagation();startScan(order.id);}}
+                            style={{...css.btn("#2563eb","#fff"),flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+                            {scanningFor===order.id?"⏳ جاري المسح...":"📷 مسح الباركود"}
+                          </button>
+                          <button onClick={e=>{
+                            e.stopPropagation();
+                            // Save actual weight to order and update total
+                            const finalTotal=Object.entries(order.items||{}).filter(([,q])=>q>0).reduce((s,[id])=>{
+                              const wKey=`${order.id}_${id}`;
+                              const w=parseFloat(scaleWeights[wKey]||0);
+                              const price=(db.pricesByCycle?.[`cycle-${db.cycle||1}`]||db.prices||{})[id]||0;
+                              return s+Math.round(w*price);
+                            },0);
+                            if(finalTotal>0){
+                              mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,total:finalTotal,scaleVerified:true}:o)}));
+                              T(`✅ تم تحديث الإجمالي: ج.م ${finalTotal}`);
+                            }
+                          }} style={{...css.btn("#059669","#fff"),flex:1}}>
+                            ✅ تأكيد الوزن
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Payment */}
                     {ro.canPay&&order.status==="تم التسليم"&&!order.paymentMethod&&(
                       <div style={{marginTop:8}}>
@@ -1085,6 +1233,30 @@ export default function App(){
                         }
                       }} style={{...css.btn("#ef4444","#fff"),marginTop:6,width:"100%"}}>
                         🗑️ مسح الإحصائيات
+                      </button>
+                    )}
+
+                    {/* Manager: sync address from latest order */}
+                    {role==="manager"&&realOrders.length>0&&!c.gov&&(
+                      <button onClick={e=>{
+                        e.stopPropagation();
+                        const latest=realOrders.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))[0];
+                        if(latest.gov){
+                          mutate(d=>({...d,clients:d.clients.map(cl=>cl.id===c.id?{
+                            ...cl,
+                            name:latest.client||cl.name,
+                            gov:latest.gov||cl.gov,
+                            area:latest.area||cl.area,
+                            street:latest.street||cl.street,
+                            building:latest.building||cl.building,
+                            aptNum:latest.aptNum||cl.aptNum,
+                            floor:latest.floor||cl.floor,
+                            propType:latest.propType||cl.propType,
+                          }:cl)}));
+                          T("✅ تم تحديث بيانات العميل");
+                        }else{T("⚠️ الطلب ليس به عنوان");}
+                      }} style={{...css.btn("#2563eb","#fff"),width:"100%",marginTop:6}}>
+                        🔄 تحديث العنوان من آخر طلب
                       </button>
                     )}
                   </div>
