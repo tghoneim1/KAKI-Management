@@ -34,6 +34,7 @@ const DEFAULT_PRODUCTS = [
   { id:"tips",         name:"دبوس ك",               emoji:"🍖", price:100 },
   { id:"shish_full",   name:"شيش طاوق ك",          emoji:"🍢", price:390 },
   { id:"shawarma_full",name:"شاورمة فراخ ك",       emoji:"🌯", price:390 },
+  { id:"chicken_wings",name:"أجنحة (تشيكن وينجز)",   emoji:"🍗", price:190,  unit:"كج" },
   { id:"liver",        name:"كبدة ك",               emoji:"🫀", price:80  },
   { id:"gizzard",      name:"قوانص ك",             emoji:"🫁", price:70  },
 ];
