@@ -32,9 +32,9 @@ const DEFAULT_PRODUCTS = [
   { id:"fillet",       name:"صدور فيليه ك",         emoji:"🥩", price:390 },
   { id:"wings",        name:"وراك كاملة ك",         emoji:"🍗", price:100 },
   { id:"tips",         name:"دبوس ك",               emoji:"🍖", price:100 },
-  { id:"shish_full",   name:"شيش طاوق ك",          emoji:"🍢", price:390 },
+  { id:"shish_full",   name:"شيش طاوق ك",          emoji:"🍢", price:390 }, 
   { id:"shawarma_full",name:"شاورمة فراخ ك",       emoji:"🌯", price:390 },
-  { id:"chicken_wings",name:"أجنحة (تشيكن وينجز)",   emoji:"🍗", price:190,  unit:"كج" },
+   { id:"chicken_wings",name:"أجنحة (تشيكن وينجز)",           emoji:"🍗", price:190,  unit:"كج" },
   { id:"liver",        name:"كبدة ك",               emoji:"🫀", price:80  },
   { id:"gizzard",      name:"قوانص ك",             emoji:"🫁", price:70  },
 ];
@@ -1751,11 +1751,22 @@ export default function App(){
               {products.map((p,i)=>{
                 const edited=priceEdits[p.id]!==undefined?priceEdits[p.id]:p.price;
                 const changed=priceEdits[p.id]!==undefined&&parseFloat(priceEdits[p.id])!==p.price;
+                const enabled=(db.productEnabled||{})[p.id]!==false; // default true
                 return(
-                  <div key={p.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:i<products.length-1?`1px solid ${BDR}`:"none"}}>
+                  <div key={p.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:i<products.length-1?`1px solid ${BDR}`:"none",opacity:enabled?1:0.45}}>
                     <div style={{display:"flex",alignItems:"center",gap:8,flex:1}}>
+                      {/* Enable/Disable toggle */}
+                      <div onClick={()=>{
+                        const newVal=!enabled;
+                        const updatedEnabled={...(db.productEnabled||{}),[p.id]:newVal};
+                        mutate(d=>({...d,productEnabled:updatedEnabled}));
+                        T(newVal?`✅ ${p.name} متاح`:`🚫 ${p.name} مخفي`);
+                      }} style={{width:36,height:20,borderRadius:10,background:enabled?"#10b981":"#374151",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
+                        <div style={{position:"absolute",top:2,left:enabled?18:2,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
+                      </div>
                       <span style={{fontSize:18}}>{p.emoji}</span>
-                      <div style={{fontWeight:600,fontSize:13,color:TXT}}>{p.name}</div>
+                      <div style={{fontWeight:600,fontSize:13,color:enabled?TXT:MUT}}>{p.name}</div>
+                      {!enabled&&<span style={{fontSize:10,color:"#ef4444",fontWeight:700}}>مخفي</span>}
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
                       {changed&&<span style={{fontSize:10,color:"#f59e0b",fontWeight:700}}>✏️</span>}
