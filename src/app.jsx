@@ -798,7 +798,7 @@ export default function App(){
                 <div style={{marginRight:"auto",fontWeight:900,fontSize:18,color:ro.color}}>{roleOrders.length}</div>
               </div>
             )}
-            {/* Status filter buttons — role specific with count badges */}
+            {/* Status filter buttons — inventory first, then role specific */}
             {(()=>{
               const roleStatuses={
                 kitchen:  ["الكل","جديد","قيد التحضير"],
@@ -808,30 +808,35 @@ export default function App(){
               };
               const statuses=roleStatuses[role]||["الكل",...ST_FLOW];
 
-              // ── Inventory summary ─────────────────────────────────────
-              // Pending orders (still need to be prepared)
+              // Inventory calculations
               const pendingOrders=roleOrders.filter(o=>["جديد","قيد التحضير"].includes(o.status));
-              // Ready/in-transit (already prepared)
               const doneOrders=roleOrders.filter(o=>["جاهز","في الطريق","تم التسليم","تم الدفع"].includes(o.status));
-
-              // Count items per product across pending orders
               const pendingItems={};
               pendingOrders.forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>{pendingItems[id]=(pendingItems[id]||0)+(q||0);}));
-              // Count items already done
               const doneItems={};
               doneOrders.forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>{doneItems[id]=(doneItems[id]||0)+(q||0);}));
-
               const allItemIds=[...new Set([...Object.keys(pendingItems),...Object.keys(doneItems)])];
 
               return(
                 <>
-                  <div style={{display:"flex",gap:5,marginBottom:8,overflowX:"auto",paddingBottom:4}}>
+                  <div style={{display:"flex",gap:5,marginBottom:12,overflowX:"auto",paddingBottom:4}}>
+                    {/* 📦 Inventory button — first */}
+                    <button onClick={()=>setShowInventory(s=>!s)}
+                      style={{...css.sm(showInventory?"#1d4ed8":"#1a2035"),border:`1px solid ${showInventory?"#3b82f6":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
+                      إجمالي الطلبات
+                      <span style={{background:showInventory?"rgba(0,0,0,.25)":"#3b82f6",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
+                        {allItemIds.length}
+                      </span>
+                    </button>
+
+                    {/* Status buttons */}
                     {statuses.map(st=>{
                       const count=st==="الكل"?roleOrders.length:roleOrders.filter(o=>o.status===st).length;
-                      const active=fSt===st;
+                      const active=fSt===st&&!showInventory;
                       const col=ST_COLOR[st]||"#d97706";
                       return(
-                        <button key={st} onClick={()=>setFSt(st)} style={{...css.sm(active?col:"#1a2035"),border:`1px solid ${active?col:BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
+                        <button key={st} onClick={()=>{setFSt(st);setShowInventory(false);}}
+                          style={{...css.sm(active?col:"#1a2035"),border:`1px solid ${active?col:BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
                           {st}
                           <span style={{background:active?"rgba(0,0,0,.25)":col,color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>{count}</span>
                         </button>
@@ -839,46 +844,31 @@ export default function App(){
                     })}
                   </div>
 
-                  {/* Inventory toggle button */}
-                  <button onClick={()=>setShowInventory(s=>!s)} style={{...css.btn("#1e3a5f","#93c5fd"),width:"100%",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px"}}>
-                    <span>📦 إجمالي الأصناف المطلوبة</span>
-                    <span style={{fontSize:11}}>{showInventory?"▲":"▼"}</span>
-                  </button>
-
+                  {/* Inventory panel */}
                   {showInventory&&(
                     <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #1e3a5f"}}>
+                      <div style={{fontSize:13,color:"#93c5fd",fontWeight:700,marginBottom:10}}>📦 إجمالي الأصناف</div>
                       {allItemIds.length===0
-                        ?<div style={{textAlign:"center",color:SUB,fontSize:12}}>لا توجد طلبات نشطة</div>
+                        ?<div style={{textAlign:"center",color:SUB,fontSize:12,padding:"16px"}}>لا توجد طلبات نشطة</div>
                         :allItemIds.map(id=>{
                           const p=products.find(x=>x.id===id);
                           const pending=pendingItems[id]||0;
                           const done=doneItems[id]||0;
                           const total=pending+done;
                           return(
-                            <div key={id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:"1px solid #1e3a5f"}}>
+                            <div key={id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:"1px solid #1e3a5f"}}>
                               <span style={{fontSize:16}}>{p?.emoji||"🍗"}</span>
-                              <div style={{flex:1,fontSize:12,color:"#e2e8f0"}}>{p?.name||id}</div>
-                              <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                                {/* Total ordered */}
-                                <span style={{background:"#1e3a5f",borderRadius:6,padding:"2px 8px",fontSize:11,color:"#93c5fd",fontWeight:700}}>
-                                  {total} {p?.unit||"كج"}
-                                </span>
-                                {/* Done (deducted) */}
-                                {done>0&&<span style={{background:"#064e3b",borderRadius:6,padding:"2px 8px",fontSize:11,color:"#10b981",fontWeight:700}}>
-                                  ✅ {done}
-                                </span>}
-                                {/* Still pending */}
-                                {pending>0&&<span style={{background:"#7c2d12",borderRadius:6,padding:"2px 8px",fontSize:11,color:"#fca5a5",fontWeight:700}}>
-                                  ⏳ {pending}
-                                </span>}
+                              <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:600}}>{p?.name||id}</div>
+                              <div style={{display:"flex",gap:5,alignItems:"center"}}>
+                                <span style={{background:"#1e3a5f",borderRadius:6,padding:"2px 8px",fontSize:12,color:"#93c5fd",fontWeight:800}}>{total}</span>
+                                {done>0&&<span style={{background:"#064e3b",borderRadius:6,padding:"2px 8px",fontSize:12,color:"#10b981",fontWeight:800}}>✅{done}</span>}
+                                {pending>0&&<span style={{background:"#7c2d12",borderRadius:6,padding:"2px 8px",fontSize:12,color:"#fca5a5",fontWeight:800}}>⏳{pending}</span>}
                               </div>
                             </div>
                           );
                         })
                       }
-                      <div style={{marginTop:8,fontSize:10,color:SUB,textAlign:"center"}}>
-                        🔵 الإجمالي | ✅ جاهز/في الطريق | ⏳ قيد التحضير
-                      </div>
+                      <div style={{marginTop:8,fontSize:10,color:SUB,textAlign:"center"}}>الإجمالي | ✅ جاهز | ⏳ قيد التحضير</div>
                     </div>
                   )}
                 </>
