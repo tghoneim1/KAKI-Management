@@ -808,14 +808,11 @@ export default function App(){
               };
               const statuses=roleStatuses[role]||["الكل",...ST_FLOW];
 
-              // Inventory calculations
+              // Only count orders still needing preparation
               const pendingOrders=roleOrders.filter(o=>["جديد","قيد التحضير"].includes(o.status));
-              const doneOrders=roleOrders.filter(o=>["جاهز","في الطريق","تم التسليم","تم الدفع"].includes(o.status));
               const pendingItems={};
               pendingOrders.forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>{pendingItems[id]=(pendingItems[id]||0)+(q||0);}));
-              const doneItems={};
-              doneOrders.forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>{doneItems[id]=(doneItems[id]||0)+(q||0);}));
-              const allItemIds=[...new Set([...Object.keys(pendingItems),...Object.keys(doneItems)])];
+              const allItemIds=Object.keys(pendingItems);
 
               return(
                 <>
@@ -847,35 +844,30 @@ export default function App(){
                   {/* Inventory panel */}
                   {showInventory&&(
                     <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #1e3a5f"}}>
-                      <div style={{fontSize:13,color:"#93c5fd",fontWeight:700,marginBottom:10}}>📦 إجمالي الأصناف</div>
+                      <div style={{fontSize:13,color:"#93c5fd",fontWeight:700,marginBottom:10}}>📦 الأصناف المطلوب تحضيرها</div>
                       {allItemIds.length===0
-                        ?<div style={{textAlign:"center",color:SUB,fontSize:12,padding:"16px"}}>لا توجد طلبات نشطة</div>
+                        ?<div style={{textAlign:"center",color:SUB,fontSize:12,padding:"16px"}}>✅ لا توجد طلبات قيد التحضير</div>
                         :allItemIds.map(id=>{
                           const p=products.find(x=>x.id===id);
-                          const pending=pendingItems[id]||0;
-                          const done=doneItems[id]||0;
-                          const total=pending+done;
+                          const qty=pendingItems[id]||0;
                           return(
-                            <div key={id} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 0",borderBottom:"1px solid #1e3a5f"}}>
-                              <span style={{fontSize:16}}>{p?.emoji||"🍗"}</span>
-                              <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:600}}>{p?.name||id}</div>
-                              <div style={{display:"flex",gap:5,alignItems:"center"}}>
-                                <span style={{background:"#1e3a5f",borderRadius:6,padding:"2px 8px",fontSize:12,color:"#93c5fd",fontWeight:800}}>{total}</span>
-                                {done>0&&<span style={{background:"#064e3b",borderRadius:6,padding:"2px 8px",fontSize:12,color:"#10b981",fontWeight:800}}>✅{done}</span>}
-                                {pending>0&&<span style={{background:"#7c2d12",borderRadius:6,padding:"2px 8px",fontSize:12,color:"#fca5a5",fontWeight:800}}>⏳{pending}</span>}
-                              </div>
+                            <div key={id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid #1e3a5f"}}>
+                              <span style={{fontSize:20}}>{p?.emoji||"🍗"}</span>
+                              <div style={{flex:1,fontSize:13,color:"#e2e8f0",fontWeight:600}}>{p?.name||id}</div>
+                              <span style={{background:"#1e3a5f",borderRadius:8,padding:"4px 14px",fontSize:15,color:"#f59e0b",fontWeight:900}}>
+                                {qty} {p?.unit||"كج"}
+                              </span>
                             </div>
                           );
                         })
                       }
-                      <div style={{marginTop:8,fontSize:10,color:SUB,textAlign:"center"}}>الإجمالي | ✅ جاهز | ⏳ قيد التحضير</div>
                     </div>
                   )}
                 </>
               );
             })()}
-            {filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>لا توجد طلبات</div></div>}
-            {filtOrders.map(order=>(
+            {!showInventory&&filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>لا توجد طلبات</div></div>}
+            {!showInventory&&filtOrders.map(order=>(
               <div key={order.id} style={{...css.card,borderColor:expOrder===order.id?ST_COLOR[order.status]:BDR,cursor:"pointer"}} onClick={()=>setExpOrder(expOrder===order.id?null:order.id)}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
