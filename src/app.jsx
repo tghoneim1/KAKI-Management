@@ -26,7 +26,7 @@ const GOV_COLORS={"القاهرة":"#f59e0b","الجيزة":"#10b981","القا�
 
 const DEFAULT_PRODUCTS = [
   { id:"whole",         name:"فرخة كاملة",          emoji:"🐔", price:190, pricePerKg:190, byWeight:true },
-  { id:"shamoort",      name:"فرخة صغيرة (شاموط)",  emoji:"🐣", price:150 },
+  { id:"shamoort",      name:"شامورط (750-1000 جم)",  emoji:"🐣", price:150 },
   { id:"breast_full",   name:"صدور بالعظام ك",       emoji:"🥩", price:250 },
   { id:"breast_deb",    name:"صدور مخلية ك",         emoji:"🥩", price:390 },
   { id:"fillet",        name:"صدور فيليه ك",         emoji:"🥩", price:390 },
