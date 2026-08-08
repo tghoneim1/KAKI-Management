@@ -341,6 +341,8 @@ export default function App(){
   const [cSearch,setCSearch]=useState("");
   const [lang,setLang]=useState("AR");
   const [showInventory,setShowInventory]=useState(false);
+  const [editingOrderId,setEditingOrderId]=useState(null);
+  const [editItems,setEditItems]=useState({});
   const [scaleWeights,setScaleWeights]=useState({});
   const [scanningFor,setScanningFor]=useState(null);
   // Price editing state
@@ -1113,8 +1115,56 @@ export default function App(){
                     {order.paymentMethod&&<div style={{marginTop:8,fontSize:13,color:"#10b981",fontWeight:700}}>✅ تم الدفع بـ {order.paymentMethod}</div>}
                     {order.confirmedAt&&<div style={{marginTop:4,fontSize:11,color:"#10b981"}}>✅ تم التأكيد المزدوج — {new Date(order.confirmedAt).toLocaleTimeString("ar-EG")}</div>}
 
-                    {/* Delete order — manager only */}
+                    {/* ✏️ Edit order — manager only */}
                     {role==="manager"&&(
+                      editingOrderId===order.id
+                      ?(
+                        <div style={{marginTop:12,background:"#0d1929",borderRadius:10,padding:"12px",border:"1px solid #1e3a5f"}}>
+                          <div style={{fontSize:12,color:"#93c5fd",fontWeight:700,marginBottom:10}}>✏️ تعديل الطلب</div>
+                          {products.map(p=>{
+                            const qty=editItems[p.id]||0;
+                            return(
+                              <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                                <span style={{fontSize:14}}>{p.emoji}</span>
+                                <div style={{flex:1,fontSize:11,color:"#e2e8f0"}}>{p.name}</div>
+                                <button onClick={e=>{e.stopPropagation();setEditItems(prev=>({...prev,[p.id]:Math.max(0,(prev[p.id]||0)-1)}));}} style={{width:26,height:26,borderRadius:6,border:"none",background:"#1e3a5f",color:"#fff",cursor:"pointer",fontWeight:700}}>−</button>
+                                <span style={{minWidth:20,textAlign:"center",fontWeight:900,color:qty>0?"#f59e0b":"#64748b"}}>{qty}</span>
+                                <button onClick={e=>{e.stopPropagation();setEditItems(prev=>({...prev,[p.id]:(prev[p.id]||0)+1}));}} style={{width:26,height:26,borderRadius:6,border:"none",background:qty>0?"#d97706":"#1e3a5f",color:"#fff",cursor:"pointer",fontWeight:700}}>+</button>
+                              </div>
+                            );
+                          })}
+                          {/* New total preview */}
+                          <div style={{borderTop:"1px solid #1e3a5f",paddingTop:8,marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                            <span style={{fontSize:12,color:"#94a3b8"}}>الإجمالي الجديد</span>
+                            <span style={{fontSize:15,fontWeight:900,color:"#f59e0b"}}>
+                              ج.م {Object.entries(editItems).reduce((s,[id,q])=>{const p=products.find(x=>x.id===id);return s+(p?getUnitPrice(p)*(q||0):0);},0)}
+                            </span>
+                          </div>
+                          <div style={{display:"flex",gap:6,marginTop:10}}>
+                            <button onClick={e=>{
+                              e.stopPropagation();
+                              const newTotal=Object.entries(editItems).reduce((s,[id,q])=>{const p=products.find(x=>x.id===id);return s+(p?getUnitPrice(p)*(q||0):0);},0);
+                              const cleanItems=Object.fromEntries(Object.entries(editItems).filter(([,q])=>q>0));
+                              mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,items:cleanItems,total:newTotal}:o)}));
+                              setEditingOrderId(null);
+                              T("✅ تم تعديل الطلب");
+                            }} style={{...css.btn("#059669","#fff"),flex:1}}>✅ حفظ</button>
+                            <button onClick={e=>{e.stopPropagation();setEditingOrderId(null);}} style={{...css.btn("#374151","#fff"),flex:1}}>إلغاء</button>
+                          </div>
+                        </div>
+                      ):(
+                        <button onClick={e=>{
+                          e.stopPropagation();
+                          setEditItems({...order.items});
+                          setEditingOrderId(order.id);
+                        }} style={{...css.sm("#1d4ed8"),width:"100%",marginTop:10,display:"block",textAlign:"center",padding:"8px"}}>
+                          ✏️ تعديل الطلب
+                        </button>
+                      )
+                    )}
+
+                    {/* Delete order — manager only */}
+                    {role==="manager"&&editingOrderId!==order.id&&(
                       <button onClick={e=>{
                         e.stopPropagation();
                         if(window.confirm(`هل أنت متأكد من مسح الطلب ${order.id}؟`)){
@@ -1122,7 +1172,7 @@ export default function App(){
                           setExpOrder(null);
                           T("🗑️ تم مسح الطلب");
                         }
-                      }} style={{...css.sm("#ef4444"),width:"100%",marginTop:12,display:"block",textAlign:"center",padding:"8px"}}>
+                      }} style={{...css.sm("#ef4444"),width:"100%",marginTop:6,display:"block",textAlign:"center",padding:"8px"}}>
                         🗑️ مسح الطلب
                       </button>
                     )}
