@@ -340,8 +340,9 @@ export default function App(){
   const [fSt,setFSt]=useState("الكل");
   const [cSearch,setCSearch]=useState("");
   const [lang,setLang]=useState("AR");
-  const [scaleWeights,setScaleWeights]=useState({});  // {orderId_itemId: weight}
-  const [scanningFor,setScanningFor]=useState(null);  // orderId being scanned
+  const [showInventory,setShowInventory]=useState(false);
+  const [scaleWeights,setScaleWeights]=useState({});
+  const [scanningFor,setScanningFor]=useState(null);
   // Price editing state
   const [priceEdits,setPriceEdits]=useState({});
   const [priceSaved,setPriceSaved]=useState(false);
@@ -820,7 +821,6 @@ export default function App(){
               const doneItems={};
               doneOrders.forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>{doneItems[id]=(doneItems[id]||0)+(q||0);}));
 
-              const [showInventory,setShowInventory]=useState(false);
               const allItemIds=[...new Set([...Object.keys(pendingItems),...Object.keys(doneItems)])];
 
               return(
