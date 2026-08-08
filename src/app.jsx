@@ -25,18 +25,24 @@ const GOV_COLORS={"القاهرة":"#f59e0b","الجيزة":"#10b981","القا�
 
 
 const DEFAULT_PRODUCTS = [
-  { id:"whole",        name:"فرخة كاملة",          emoji:"🐔", price:190 },
-  { id:"shamoort",     name:"فرخة صغيرة (شاموط)",  emoji:"🐣", price:150 },
-  { id:"breast_full",  name:"صدور كاملة ك",         emoji:"🥩", price:250 },
-  { id:"breast_deb",   name:"صدور مخلية كاملة ك",  emoji:"🥩", price:390 },
-  { id:"fillet",       name:"صدور فيليه ك",         emoji:"🥩", price:390 },
-  { id:"wings",        name:"وراك كاملة ك",         emoji:"🍗", price:100 },
-  { id:"tips",         name:"دبوس ك",               emoji:"🍖", price:100 },
-  { id:"shish_full",   name:"شيش طاوق ك",          emoji:"🍢", price:390 }, 
-  { id:"shawarma_full",name:"شاورمة فراخ ك",       emoji:"🌯", price:390 },
-   { id:"chicken_wings",name:"أجنحة (تشيكن وينجز)",           emoji:"🍗", price:190,  unit:"كج" },
-  { id:"liver",        name:"كبدة ك",               emoji:"🫀", price:80  },
-  { id:"gizzard",      name:"قوانص ك",             emoji:"🫁", price:70  },
+  { id:"whole",         name:"فرخة كاملة",          emoji:"🐔", price:190, pricePerKg:190, byWeight:true },
+  { id:"shamoort",      name:"فرخة صغيرة (شاموط)",  emoji:"🐣", price:150 },
+  { id:"breast_full",   name:"صدور بالعظام ك",       emoji:"🥩", price:250 },
+  { id:"breast_deb",    name:"صدور مخلية ك",         emoji:"🥩", price:390 },
+  { id:"fillet",        name:"صدور فيليه ك",         emoji:"🥩", price:390 },
+  { id:"wings",         name:"وراك كاملة ك",         emoji:"🍗", price:190 },
+  { id:"tips",          name:"دبوس ك",               emoji:"🍖", price:275 },
+  { id:"shish",         name:"شيش طاوق بدون دهون ك", emoji:"🍢", price:390 },
+  { id:"shish_half",    name:"شيش طاوق ½ك",          emoji:"🍢", price:195 },
+  { id:"shish_full",    name:"شيش طاوق ك",           emoji:"🍢", price:390 },
+  { id:"shawarma",      name:"شاورمة بدون دهون ك",   emoji:"🌯", price:390 },
+  { id:"shawarma_half", name:"شاورمة فراخ ½ك",       emoji:"🌯", price:195 },
+  { id:"shawarma_full", name:"شاورمة فراخ ك",        emoji:"🌯", price:390 },
+  { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",  emoji:"🍗", price:190 },
+  { id:"liver",         name:"كبدة ك",               emoji:"🫀", price:80  },
+  { id:"giblets",       name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
+  { id:"liver_giz",     name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
+  { id:"gizzard",       name:"قوانص ك",              emoji:"🫁", price:70  },
 ];
 
 const ST_FLOW  = ["جديد","قيد التحضير","جاهز","في الطريق","تم التسليم","تم الدفع"];
@@ -316,7 +322,9 @@ export default function App(){
   const cycleKey=`cycle-${db.cycle||1}`;
   const cyclePrices=db.pricesByCycle?.[cycleKey]||{};
   const products=DEFAULT_PRODUCTS.map(p=>({...p,price:cyclePrices[p.id]??db.prices?.[p.id]??p.price}));
-  const tot=items=>Object.entries(items||{}).reduce((s,[id,q])=>{const p=products.find(x=>x.id===id);return s+(p?p.price*(q||0):0);},0);
+  const CHICKEN_AVG_W=1.7;
+  const getUnitPrice=p=>p&&p.byWeight?Math.round((p.pricePerKg||p.price)*CHICKEN_AVG_W):p?.price||0;
+  const tot=items=>Object.entries(items||{}).reduce((s,[id,q])=>{const p=products.find(x=>x.id===id);return s+(p?getUnitPrice(p)*(q||0):0);},0);
   const emptyItems=()=>products.reduce((a,p)=>({...a,[p.id]:0}),{});
 
   const EF={client:"",prefix:"",phone:"",address:"",gov:"",area:"",details:"",notes:"",deliveryDate:"",memberSearch:"",items:emptyItems()};
@@ -879,7 +887,7 @@ export default function App(){
                         const showPrice=role==="manager"||role==="delivery";
                         return p?(<div key={id} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"4px 0",borderBottom:`1px solid #1a2035`}}>
                           <span>{p.emoji} {p.name} × {qty}</span>
-                          {showPrice&&<span style={{color:"#f59e0b",fontWeight:700}}>ج.م {p.price*qty}</span>}
+                          {showPrice&&<span style={{color:"#f59e0b",fontWeight:700}}>ج.م {getUnitPrice(p)*qty}{p?.byWeight?" (تقديري)":""}</span>}
                         </div>):null;
                       })}
                       {(role==="manager"||role==="delivery")&&(
@@ -896,7 +904,7 @@ export default function App(){
                         e.stopPropagation();
                         const itemLines=Object.entries(order.items||{}).filter(([,q])=>q>0).map(([id,qty])=>{
                           const p=products.find(x=>x.id===id);
-                          return p?`${p.emoji} ${p.name} × ${qty} = ج.م ${p.price*qty}`:null;
+                          return p?`${p.emoji} ${p.name} × ${qty} = ج.م ${getUnitPrice(p)*qty}${p.byWeight?" (تقديري)":""}`:null;
                         }).filter(Boolean).join("\n");
                         const msg=`✅ تم تأكيد طلبك — دواجن كاكي\n━━━━━━━━━━━━\n👤 ${order.client}\n📋 رقم الطلب: ${order.id}\n━━━━━━━━━━━━\n${itemLines}\n━━━━━━━━━━━━\n💰 الإجمالي: ج.م ${order.total}\n⏰ سيتم التواصل معك قريباً لتحديد موعد التسليم\n━━━━━━━━━━━━\nشكراً لثقتك في كاكي 🐔`;
                         window.open(`https://wa.me/${order.phone.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(msg)}`,"_blank");
