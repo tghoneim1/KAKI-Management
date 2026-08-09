@@ -33,11 +33,15 @@ const DEFAULT_PRODUCTS = [
   { id:"wings",         name:"وراك كاملة ك",         emoji:"🍗", price:190 },
   { id:"tips",          name:"دبوس ك",               emoji:"🍖", price:275 },
   { id:"shish",         name:"شيش طاوق بدون دهون ك", emoji:"🍢", price:390 },
+  { id:"shish_half",    name:"شيش طاوق ½ك",          emoji:"🍢", price:195 },
   { id:"shish_full",    name:"شيش طاوق ك",           emoji:"🍢", price:390 },
   { id:"shawarma",      name:"شاورمة بدون دهون ك",   emoji:"🌯", price:390 },
+  { id:"shawarma_half", name:"شاورمة فراخ ½ك",       emoji:"🌯", price:195 },
   { id:"shawarma_full", name:"شاورمة فراخ ك",        emoji:"🌯", price:390 },
   { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",  emoji:"🍗", price:190 },
   { id:"liver",         name:"كبدة ك",               emoji:"🫀", price:80  },
+  { id:"giblets",       name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
+  { id:"liver_giz",     name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
   { id:"gizzard",       name:"قوانص ك",              emoji:"🫁", price:70  },
 ];
 
@@ -897,11 +901,11 @@ export default function App(){
                               <div style={{display:"flex",alignItems:"center",gap:4,background:"#1a2035",borderRadius:8,padding:"5px 8px"}}>
                                 <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))}
                                   style={{width:22,height:22,borderRadius:5,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700}}>−</button>
-                                <input type="number" min="0" value={stockQty}
-                                  onChange={e=>{const v=Math.max(0,parseInt(e.target.value)||0);mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
+                                <input type="number" min="0" max="9999" value={stockQty}
+                                  onChange={e=>{const v=Math.min(9999,Math.max(0,parseInt(e.target.value)||0));mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
                                   onClick={e=>e.stopPropagation()}
-                                  style={{width:36,background:"none",border:"none",color:"#f59e0b",fontWeight:900,fontSize:15,textAlign:"center",fontFamily:"'Cairo',sans-serif"}}/>
-                                <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}}))}
+                                  style={{width:60,background:"none",border:"none",color:"#f59e0b",fontWeight:900,fontSize:15,textAlign:"center",fontFamily:"'Cairo',sans-serif"}}/>
+                                <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.min(9999,(d.stock?.[p.id]||0)+1)}}))}
                                   style={{width:22,height:22,borderRadius:5,border:"none",background:"#047857",color:"#fff",cursor:"pointer",fontWeight:700}}>+</button>
                               </div>
 
