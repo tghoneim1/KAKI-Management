@@ -816,16 +816,7 @@ export default function App(){
               return(
                 <>
                   <div style={{display:"flex",gap:5,marginBottom:12,overflowX:"auto",paddingBottom:4}}>
-                    {/* 📦 Inventory button — first */}
-                    <button onClick={()=>{setShowInventory(s=>!s);setShowStock(false);}}
-                      style={{...css.sm(showInventory?"#1d4ed8":"#1a2035"),border:`1px solid ${showInventory?"#3b82f6":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
-                      إجمالي الطلبات
-                      <span style={{background:showInventory?"rgba(0,0,0,.25)":"#3b82f6",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
-                        {allItemIds.length}
-                      </span>
-                    </button>
-
-                    {/* 🏪 Stock button — manager only */}
+                    {/* 🏪 Stock button — first, manager only */}
                     {role==="manager"&&(
                       <button onClick={()=>{setShowStock(s=>!s);setShowInventory(false);}}
                         style={{...css.sm(showStock?"#065f46":"#1a2035"),border:`1px solid ${showStock?"#10b981":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
@@ -835,6 +826,15 @@ export default function App(){
                         </span>
                       </button>
                     )}
+
+                    {/* 📦 Inventory button */}
+                    <button onClick={()=>{setShowInventory(s=>!s);setShowStock(false);}}
+                      style={{...css.sm(showInventory?"#1d4ed8":"#1a2035"),border:`1px solid ${showInventory?"#3b82f6":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
+                      إجمالي الطلبات
+                      <span style={{background:showInventory?"rgba(0,0,0,.25)":"#3b82f6",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
+                        {allItemIds.length}
+                      </span>
+                    </button>
 
                     {/* Status buttons */}
                     {statuses.map(st=>{
@@ -874,7 +874,7 @@ export default function App(){
                     </div>
                   )}
 
-                  {/* Stock panel */}
+                      {/* Stock panel */}
                   {showStock&&(
                     <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #064e3b"}}>
                       <div style={{fontSize:13,color:"#10b981",fontWeight:700,marginBottom:10}}>🏪 المخزن</div>
@@ -884,34 +884,52 @@ export default function App(){
                         const remaining=stockQty-ordered;
                         const outOfStock=stockQty>0&&remaining<=0;
                         return(
-                          <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid #064e3b"}}>
-                            <span style={{fontSize:18}}>{p.emoji}</span>
-                            <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:600}}>{p.name}</div>
-                            <div style={{display:"flex",alignItems:"center",gap:6}}>
-                              <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))}
-                                style={{width:24,height:24,borderRadius:6,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700}}>−</button>
-                              <input type="number" min="0" value={stockQty}
-                                onChange={e=>{const v=Math.max(0,parseInt(e.target.value)||0);mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
-                                onClick={e=>e.stopPropagation()}
-                                style={{width:36,background:"none",border:"1px solid #064e3b",borderRadius:6,color:"#f59e0b",fontWeight:900,fontSize:14,textAlign:"center",fontFamily:"'Cairo',sans-serif",padding:"2px"}}/>
-                              <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}}))}
-                                style={{width:24,height:24,borderRadius:6,border:"none",background:"#047857",color:"#fff",cursor:"pointer",fontWeight:700}}>+</button>
-                              <span style={{minWidth:40,textAlign:"center",fontSize:13,fontWeight:800,color:stockQty===0?"#64748b":outOfStock?"#ef4444":remaining<=3?"#f59e0b":"#10b981"}}>
-                                {stockQty===0?"—":outOfStock?"نفد":remaining}
-                              </span>
-                              {outOfStock&&<span style={{fontSize:10,color:"#ef4444"}}>⚠️</span>}
+                          <div key={p.id} style={{padding:"10px 0",borderBottom:"1px solid #064e3b"}}>
+                            {/* Product name */}
+                            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                              <span style={{fontSize:18}}>{p.emoji}</span>
+                              <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:700}}>{p.name}</div>
+                              {outOfStock&&<span style={{background:"#ef4444",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800}}>⚠️ نفد</span>}
+                            </div>
+                            {/* Stock controls + formula */}
+                            <div style={{display:"flex",alignItems:"center",gap:8}}>
+                              {/* Stock input */}
+                              <div style={{display:"flex",alignItems:"center",gap:4,background:"#1a2035",borderRadius:8,padding:"5px 8px"}}>
+                                <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))}
+                                  style={{width:22,height:22,borderRadius:5,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700}}>−</button>
+                                <input type="number" min="0" value={stockQty}
+                                  onChange={e=>{const v=Math.max(0,parseInt(e.target.value)||0);mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
+                                  onClick={e=>e.stopPropagation()}
+                                  style={{width:36,background:"none",border:"none",color:"#f59e0b",fontWeight:900,fontSize:15,textAlign:"center",fontFamily:"'Cairo',sans-serif"}}/>
+                                <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}}))}
+                                  style={{width:22,height:22,borderRadius:5,border:"none",background:"#047857",color:"#fff",cursor:"pointer",fontWeight:700}}>+</button>
+                              </div>
+
+                              {/* Formula */}
+                              <span style={{color:"#64748b",fontSize:13}}>−</span>
+                              <div style={{background:"#1a2035",borderRadius:8,padding:"5px 12px",textAlign:"center"}}>
+                                <div style={{fontSize:9,color:"#f97316",marginBottom:2}}>طلبات</div>
+                                <div style={{fontSize:15,fontWeight:900,color:"#f97316"}}>{ordered}</div>
+                              </div>
+                              <span style={{color:"#64748b",fontSize:13}}>=</span>
+                              <div style={{background:outOfStock?"#7c2d1244":remaining<=3&&stockQty>0?"#78350f44":"#1a2035",borderRadius:8,padding:"5px 12px",textAlign:"center",flex:1}}>
+                                <div style={{fontSize:9,color:MUT,marginBottom:2}}>المتبقي</div>
+                                <div style={{fontSize:15,fontWeight:900,color:stockQty===0?"#64748b":outOfStock?"#ef4444":remaining<=3?"#f59e0b":"#10b981"}}>
+                                  {stockQty===0?"—":remaining}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         );
                       })}
-                      <div style={{marginTop:8,fontSize:10,color:MUT,textAlign:"center"}}>المخزن | المتبقي بعد الطلبات النشطة</div>
+                      <div style={{marginTop:8,fontSize:10,color:MUT,textAlign:"center"}}>المخزن − الطلبات النشطة = المتبقي</div>
                     </div>
                   )}
                 </>
               );
             })()}
-            {!showInventory&&filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>لا توجد طلبات</div></div>}
-            {!showInventory&&filtOrders.map(order=>(
+            {!showInventory&&!showStock&&filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>لا توجد طلبات</div></div>}
+            {!showInventory&&!showStock&&filtOrders.map(order=>(
               <div key={order.id} style={{...css.card,borderColor:expOrder===order.id?ST_COLOR[order.status]:BDR,cursor:"pointer"}} onClick={()=>setExpOrder(expOrder===order.id?null:order.id)}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
