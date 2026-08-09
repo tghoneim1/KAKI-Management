@@ -58,7 +58,7 @@ const COST_CATS= [
   {id:"transport",name:"النقل",emoji:"🚚"},{id:"other",name:"أخرى",emoji:"📝"},
 ];
 const ROLES = {
-  manager:  {label:"مدير", emoji:"👑",pin:"1234",color:"#f59e0b",tabs:["dashboard","new","orders","clients","costs","settings","stock"],canAdvance:ST_FLOW,canPay:true,canDeliver:true},
+  manager:  {label:"مدير", emoji:"👑",pin:"1234",color:"#f59e0b",tabs:["dashboard","new","orders","clients","costs","settings"],canAdvance:ST_FLOW,canPay:true,canDeliver:true},
   kitchen:  {label:"مطبخ", emoji:"👨‍🍳",pin:"1111",color:"#3b82f6",tabs:["orders"],canAdvance:["قيد التحضير","جاهز","في الطريق"],canPay:false,canDeliver:false},
   delivery: {label:"توصيل",emoji:"🛵",pin:"2222",color:"#f97316",tabs:["orders"],canAdvance:["في الطريق","تم التسليم"],canPay:false,canDeliver:true},
   cashier:  {label:"كاشير",emoji:"💳",pin:"3333",color:"#10b981",tabs:["orders","dashboard"],canAdvance:[],canPay:true,canDeliver:false},
@@ -341,6 +341,7 @@ export default function App(){
   const [cSearch,setCSearch]=useState("");
   const [lang,setLang]=useState("AR");
   const [showInventory,setShowInventory]=useState(false);
+  const [showStock,setShowStock]=useState(false);
   const [editingOrderId,setEditingOrderId]=useState(null);
   const [editItems,setEditItems]=useState({});
   const [scaleWeights,setScaleWeights]=useState({});
@@ -820,7 +821,7 @@ export default function App(){
                 <>
                   <div style={{display:"flex",gap:5,marginBottom:12,overflowX:"auto",paddingBottom:4}}>
                     {/* 📦 Inventory button — first */}
-                    <button onClick={()=>setShowInventory(s=>!s)}
+                    <button onClick={()=>{setShowInventory(s=>!s);setShowStock(false);}}
                       style={{...css.sm(showInventory?"#1d4ed8":"#1a2035"),border:`1px solid ${showInventory?"#3b82f6":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
                       إجمالي الطلبات
                       <span style={{background:showInventory?"rgba(0,0,0,.25)":"#3b82f6",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
@@ -828,13 +829,24 @@ export default function App(){
                       </span>
                     </button>
 
+                    {/* 🏪 Stock button — manager only */}
+                    {role==="manager"&&(
+                      <button onClick={()=>{setShowStock(s=>!s);setShowInventory(false);}}
+                        style={{...css.sm(showStock?"#065f46":"#1a2035"),border:`1px solid ${showStock?"#10b981":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
+                        المخزن
+                        <span style={{background:showStock?"rgba(0,0,0,.25)":"#10b981",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
+                          {products.filter(p=>(db.stock?.[p.id]||0)>0).length}
+                        </span>
+                      </button>
+                    )}
+
                     {/* Status buttons */}
                     {statuses.map(st=>{
                       const count=st==="الكل"?roleOrders.length:roleOrders.filter(o=>o.status===st).length;
                       const active=fSt===st&&!showInventory;
                       const col=ST_COLOR[st]||"#d97706";
                       return(
-                        <button key={st} onClick={()=>{setFSt(st);setShowInventory(false);}}
+                        <button key={st} onClick={()=>{setFSt(st);setShowInventory(false);setShowStock(false);}}
                           style={{...css.sm(active?col:"#1a2035"),border:`1px solid ${active?col:BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
                           {st}
                           <span style={{background:active?"rgba(0,0,0,.25)":col,color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>{count}</span>
@@ -863,6 +875,40 @@ export default function App(){
                           );
                         })
                       }
+                    </div>
+                  )}
+
+                  {/* Stock panel */}
+                  {showStock&&(
+                    <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #064e3b"}}>
+                      <div style={{fontSize:13,color:"#10b981",fontWeight:700,marginBottom:10}}>🏪 المخزن</div>
+                      {products.map(p=>{
+                        const stockQty=db.stock?.[p.id]||0;
+                        const ordered=db.orders.filter(o=>["جديد","قيد التحضير"].includes(o.status)).reduce((s,o)=>s+(o.items?.[p.id]||0),0);
+                        const remaining=stockQty-ordered;
+                        const outOfStock=stockQty>0&&remaining<=0;
+                        return(
+                          <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid #064e3b"}}>
+                            <span style={{fontSize:18}}>{p.emoji}</span>
+                            <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:600}}>{p.name}</div>
+                            <div style={{display:"flex",alignItems:"center",gap:6}}>
+                              <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))}
+                                style={{width:24,height:24,borderRadius:6,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700}}>−</button>
+                              <input type="number" min="0" value={stockQty}
+                                onChange={e=>{const v=Math.max(0,parseInt(e.target.value)||0);mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
+                                onClick={e=>e.stopPropagation()}
+                                style={{width:36,background:"none",border:"1px solid #064e3b",borderRadius:6,color:"#f59e0b",fontWeight:900,fontSize:14,textAlign:"center",fontFamily:"'Cairo',sans-serif",padding:"2px"}}/>
+                              <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}}))}
+                                style={{width:24,height:24,borderRadius:6,border:"none",background:"#047857",color:"#fff",cursor:"pointer",fontWeight:700}}>+</button>
+                              <span style={{minWidth:40,textAlign:"center",fontSize:13,fontWeight:800,color:stockQty===0?"#64748b":outOfStock?"#ef4444":remaining<=3?"#f59e0b":"#10b981"}}>
+                                {stockQty===0?"—":outOfStock?"نفد":remaining}
+                              </span>
+                              {outOfStock&&<span style={{fontSize:10,color:"#ef4444"}}>⚠️</span>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div style={{marginTop:8,fontSize:10,color:MUT,textAlign:"center"}}>المخزن | المتبقي بعد الطلبات النشطة</div>
                     </div>
                   )}
                 </>
@@ -1910,72 +1956,61 @@ export default function App(){
         {view==="stock"&&(
           <div style={{padding:"14px 12px"}}>
             <div style={{fontWeight:800,fontSize:15,color:"#f59e0b",marginBottom:4}}>📦 المخزن</div>
-            <div style={{fontSize:11,color:MUT,marginBottom:14}}>حدد الكمية المتاحة — التطبيق بيطرح الطلبات تلقائياً</div>
+            <div style={{fontSize:11,color:MUT,marginBottom:14}}>حدد الكمية المتاحة — التطبيق بيطرح الطلبات النشطة تلقائياً</div>
 
             {products.map(p=>{
               const stockQty=db.stock?.[p.id]||0;
-              // Total ordered from active orders (جديد + قيد التحضير)
               const ordered=db.orders.filter(o=>["جديد","قيد التحضير"].includes(o.status))
                 .reduce((s,o)=>s+(o.items?.[p.id]||0),0);
               const remaining=stockQty-ordered;
-              const outOfStock=remaining<=0&&stockQty>0;
-              const disabled=(db.productEnabled||{})[p.id]===false;
+              const outOfStock=stockQty>0&&remaining<=0;
               return(
-                <div key={p.id} style={{...css.card,marginBottom:8,borderColor:outOfStock?"#ef444466":disabled?"#374151":BDR,opacity:disabled?0.6:1}}>
+                <div key={p.id} style={{...css.card,marginBottom:8,borderColor:outOfStock?"#ef444466":BDR}}>
                   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                     <span style={{fontSize:22}}>{p.emoji}</span>
                     <div style={{flex:1}}>
                       <div style={{fontWeight:700,fontSize:13,color:TXT}}>{p.name}</div>
                       <div style={{fontSize:10,color:MUT}}>ج.م {p.price} / {p.unit||"كج"}</div>
                     </div>
-                    {/* Enable/disable toggle */}
-                    <div onClick={()=>{
-                      const newVal=disabled?true:false;
-                      mutate(d=>({...d,productEnabled:{...(d.productEnabled||{}),[p.id]:newVal}}));
-                      T(newVal?`✅ ${p.name} متاح`:`🚫 ${p.name} مقفول`);
-                    }} style={{display:"flex",alignItems:"center",gap:4,cursor:"pointer"}}>
-                      <span style={{fontSize:10,color:disabled?"#ef4444":"#10b981",fontWeight:700}}>{disabled?"مقفول":"متاح"}</span>
-                      <div style={{width:36,height:20,borderRadius:10,background:disabled?"#374151":"#10b981",position:"relative",transition:"background .2s"}}>
-                        <div style={{position:"absolute",top:2,left:disabled?2:18,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
-                      </div>
-                    </div>
+                    {outOfStock&&<span style={{background:"#ef4444",color:"#fff",borderRadius:6,padding:"3px 8px",fontSize:11,fontWeight:800}}>⚠️ نفد</span>}
                   </div>
 
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
-                    {/* Stock input */}
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+                    {/* Stock input with +/- */}
                     <div style={{background:"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
-                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>المخزن</div>
+                      <div style={{fontSize:9,color:MUT,marginBottom:6}}>المخزن</div>
                       <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
-                        <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))} style={{width:22,height:22,borderRadius:5,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>−</button>
+                        <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))}
+                          style={{width:24,height:24,borderRadius:6,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>−</button>
                         <input type="number" min="0" value={stockQty}
-                          onChange={e=>{const v=parseInt(e.target.value)||0;mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
+                          onChange={e=>{const v=Math.max(0,parseInt(e.target.value)||0);mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
                           onClick={e=>e.stopPropagation()}
                           style={{width:40,background:"none",border:"none",color:"#f59e0b",fontWeight:900,fontSize:16,textAlign:"center",fontFamily:"'Cairo',sans-serif"}}/>
-                        <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}}))} style={{width:22,height:22,borderRadius:5,border:"none",background:"#d97706",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>+</button>
+                        <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}}))}
+                          style={{width:24,height:24,borderRadius:6,border:"none",background:"#d97706",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>+</button>
                       </div>
                     </div>
+
                     {/* Ordered */}
                     <div style={{background:"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
                       <div style={{fontSize:9,color:MUT,marginBottom:4}}>طلبات نشطة</div>
-                      <div style={{fontSize:18,fontWeight:900,color:"#f97316"}}>{ordered}</div>
+                      <div style={{fontSize:20,fontWeight:900,color:"#f97316"}}>{ordered}</div>
                     </div>
+
                     {/* Remaining */}
                     <div style={{background:outOfStock?"#7c2d1233":"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
                       <div style={{fontSize:9,color:MUT,marginBottom:4}}>المتبقي</div>
-                      <div style={{fontSize:18,fontWeight:900,color:outOfStock?"#ef4444":remaining>3?"#10b981":"#f59e0b"}}>{stockQty>0?remaining:"—"}</div>
+                      <div style={{fontSize:20,fontWeight:900,color:stockQty===0?"#64748b":outOfStock?"#ef4444":remaining<=3?"#f59e0b":"#10b981"}}>
+                        {stockQty===0?"—":remaining}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Auto-close when out of stock */}
-                  {outOfStock&&!disabled&&(
-                    <button onClick={()=>{
-                      mutate(d=>({...d,productEnabled:{...(d.productEnabled||{}),[p.id]:false}}));
-                      T(`🚫 تم إقفال ${p.name} — نفد المخزون`);
-                    }} style={{...css.btn("#ef4444","#fff"),width:"100%",fontSize:12}}>
-                      🚫 نفد — اقفل الصنف
-                    </button>
+                  {outOfStock&&(
+                    <div style={{marginTop:8,textAlign:"center",fontSize:11,color:"#ef4444",fontWeight:700}}>
+                      ⚠️ نفد المخزون — اقفل الصنف من الأسعار
+                    </div>
                   )}
-                  {outOfStock&&<div style={{textAlign:"center",fontSize:11,color:"#ef4444",fontWeight:700,marginTop:4}}>⚠️ نفد المخزون!</div>}
                 </div>
               );
             })}
