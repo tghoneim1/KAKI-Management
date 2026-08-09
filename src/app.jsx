@@ -33,11 +33,15 @@ const DEFAULT_PRODUCTS = [
   { id:"wings",         name:"وراك كاملة ك",         emoji:"🍗", price:190 },
   { id:"tips",          name:"دبوس ك",               emoji:"🍖", price:275 },
   { id:"shish",         name:"شيش طاوق بدون دهون ك", emoji:"🍢", price:390 },
+  { id:"shish_half",    name:"شيش طاوق ½ك",          emoji:"🍢", price:195 },
   { id:"shish_full",    name:"شيش طاوق ك",           emoji:"🍢", price:390 },
   { id:"shawarma",      name:"شاورمة بدون دهون ك",   emoji:"🌯", price:390 },
+  { id:"shawarma_half", name:"شاورمة فراخ ½ك",       emoji:"🌯", price:195 },
   { id:"shawarma_full", name:"شاورمة فراخ ك",        emoji:"🌯", price:390 },
   { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",  emoji:"🍗", price:190 },
   { id:"liver",         name:"كبدة ك",               emoji:"🫀", price:80  },
+  { id:"giblets",       name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
+  { id:"liver_giz",     name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
   { id:"gizzard",       name:"قوانص ك",              emoji:"🫁", price:70  },
 ];
 
@@ -411,7 +415,24 @@ export default function App(){
     }
   };
 
-  const advance=id=>{mutate(d=>({...d,orders:d.orders.map(o=>{if(o.id!==id)return o;const i=ST_FLOW.indexOf(o.status);return i<ST_FLOW.length-1?{...o,status:ST_FLOW[i+1]}:o;})}));T("✅ تم التحديث");};
+  const advance=id=>{
+    mutate(d=>{
+      const order=d.orders.find(o=>o.id===id);
+      if(!order) return d;
+      const i=ST_FLOW.indexOf(order.status);
+      if(i>=ST_FLOW.length-1) return d;
+      const nextStatus=ST_FLOW[i+1];
+      // Deduct stock when order becomes جاهز
+      let newStock={...(d.stock||{})};
+      if(nextStatus==="جاهز"&&order.items){
+        Object.entries(order.items).forEach(([pid,qty])=>{
+          if(qty>0) newStock[pid]=Math.max(0,(newStock[pid]||0)-qty);
+        });
+      }
+      return{...d,stock:newStock,orders:d.orders.map(o=>o.id===id?{...o,status:nextStatus}:o)};
+    });
+    T("✅ تم التحديث");
+  };
   const assignDel=(id,svc)=>{mutate(d=>({...d,orders:d.orders.map(o=>o.id===id?{...o,deliveryService:svc}:o)}));T(`🛵 ${svc}`);};
   const pay=(id,m)=>{mutate(d=>({...d,orders:d.orders.map(o=>o.id===id?{...o,paymentMethod:m,status:"تم الدفع"}:o)}));setExpOrder(null);T("💰 تم الدفع");};
 
