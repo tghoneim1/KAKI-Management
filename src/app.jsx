@@ -58,7 +58,7 @@ const COST_CATS= [
   {id:"transport",name:"النقل",emoji:"🚚"},{id:"other",name:"أخرى",emoji:"📝"},
 ];
 const ROLES = {
-  manager:  {label:"مدير", emoji:"👑",pin:"1234",color:"#f59e0b",tabs:["dashboard","new","orders","clients","costs","settings"],canAdvance:ST_FLOW,canPay:true,canDeliver:true},
+  manager:  {label:"مدير", emoji:"👑",pin:"1234",color:"#f59e0b",tabs:["dashboard","new","orders","clients","costs","settings","stock"],canAdvance:ST_FLOW,canPay:true,canDeliver:true},
   kitchen:  {label:"مطبخ", emoji:"👨‍🍳",pin:"1111",color:"#3b82f6",tabs:["orders"],canAdvance:["قيد التحضير","جاهز","في الطريق"],canPay:false,canDeliver:false},
   delivery: {label:"توصيل",emoji:"🛵",pin:"2222",color:"#f97316",tabs:["orders"],canAdvance:["في الطريق","تم التسليم"],canPay:false,canDeliver:true},
   cashier:  {label:"كاشير",emoji:"💳",pin:"3333",color:"#10b981",tabs:["orders","dashboard"],canAdvance:[],canPay:true,canDeliver:false},
@@ -568,7 +568,7 @@ export default function App(){
   const filtOrders=fSt==="الكل"?roleOrders:roleOrders.filter(o=>o.status===fSt);
   const filtClients=db.clients.filter(c=>!cSearch||c.name?.includes(cSearch)||c.phone?.includes(cSearch)||c.memberId?.includes(cSearch));
   const tabs=ro?ro.tabs:[];
-  const tabMeta={dashboard:["📊","الرئيسية"],new:["💬","طلب"],orders:["📋","الطلبات"],clients:["👥","العملاء"],costs:["💰","التكاليف"],settings:["⚙️","الأسعار"]};
+  const tabMeta={dashboard:["📊","الرئيسية"],new:["💬","طلب"],orders:["📋","الطلبات"],clients:["👥","العملاء"],costs:["💰","التكاليف"],settings:["⚙️","الأسعار"],stock:["📦","المخزن"]};
 
   // Show loading while Firebase loads
   if(!dbLoaded) return(
@@ -1906,9 +1906,81 @@ export default function App(){
           </div>
         )}
 
-      </div>
-    </div>
-  );
+        {/* ══ STOCK VIEW ══ */}
+        {view==="stock"&&(
+          <div style={{padding:"14px 12px"}}>
+            <div style={{fontWeight:800,fontSize:15,color:"#f59e0b",marginBottom:4}}>📦 المخزن</div>
+            <div style={{fontSize:11,color:MUT,marginBottom:14}}>حدد الكمية المتاحة — التطبيق بيطرح الطلبات تلقائياً</div>
+
+            {products.map(p=>{
+              const stockQty=db.stock?.[p.id]||0;
+              // Total ordered from active orders (جديد + قيد التحضير)
+              const ordered=db.orders.filter(o=>["جديد","قيد التحضير"].includes(o.status))
+                .reduce((s,o)=>s+(o.items?.[p.id]||0),0);
+              const remaining=stockQty-ordered;
+              const outOfStock=remaining<=0&&stockQty>0;
+              const disabled=(db.productEnabled||{})[p.id]===false;
+              return(
+                <div key={p.id} style={{...css.card,marginBottom:8,borderColor:outOfStock?"#ef444466":disabled?"#374151":BDR,opacity:disabled?0.6:1}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                    <span style={{fontSize:22}}>{p.emoji}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:700,fontSize:13,color:TXT}}>{p.name}</div>
+                      <div style={{fontSize:10,color:MUT}}>ج.م {p.price} / {p.unit||"كج"}</div>
+                    </div>
+                    {/* Enable/disable toggle */}
+                    <div onClick={()=>{
+                      const newVal=disabled?true:false;
+                      mutate(d=>({...d,productEnabled:{...(d.productEnabled||{}),[p.id]:newVal}}));
+                      T(newVal?`✅ ${p.name} متاح`:`🚫 ${p.name} مقفول`);
+                    }} style={{display:"flex",alignItems:"center",gap:4,cursor:"pointer"}}>
+                      <span style={{fontSize:10,color:disabled?"#ef4444":"#10b981",fontWeight:700}}>{disabled?"مقفول":"متاح"}</span>
+                      <div style={{width:36,height:20,borderRadius:10,background:disabled?"#374151":"#10b981",position:"relative",transition:"background .2s"}}>
+                        <div style={{position:"absolute",top:2,left:disabled?2:18,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
+                    {/* Stock input */}
+                    <div style={{background:"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
+                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>المخزن</div>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+                        <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))} style={{width:22,height:22,borderRadius:5,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>−</button>
+                        <input type="number" min="0" value={stockQty}
+                          onChange={e=>{const v=parseInt(e.target.value)||0;mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:v}}));}}
+                          onClick={e=>e.stopPropagation()}
+                          style={{width:40,background:"none",border:"none",color:"#f59e0b",fontWeight:900,fontSize:16,textAlign:"center",fontFamily:"'Cairo',sans-serif"}}/>
+                        <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}}))} style={{width:22,height:22,borderRadius:5,border:"none",background:"#d97706",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>+</button>
+                      </div>
+                    </div>
+                    {/* Ordered */}
+                    <div style={{background:"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
+                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>طلبات نشطة</div>
+                      <div style={{fontSize:18,fontWeight:900,color:"#f97316"}}>{ordered}</div>
+                    </div>
+                    {/* Remaining */}
+                    <div style={{background:outOfStock?"#7c2d1233":"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
+                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>المتبقي</div>
+                      <div style={{fontSize:18,fontWeight:900,color:outOfStock?"#ef4444":remaining>3?"#10b981":"#f59e0b"}}>{stockQty>0?remaining:"—"}</div>
+                    </div>
+                  </div>
+
+                  {/* Auto-close when out of stock */}
+                  {outOfStock&&!disabled&&(
+                    <button onClick={()=>{
+                      mutate(d=>({...d,productEnabled:{...(d.productEnabled||{}),[p.id]:false}}));
+                      T(`🚫 تم إقفال ${p.name} — نفد المخزون`);
+                    }} style={{...css.btn("#ef4444","#fff"),width:"100%",fontSize:12}}>
+                      🚫 نفد — اقفل الصنف
+                    </button>
+                  )}
+                  {outOfStock&&<div style={{textAlign:"center",fontSize:11,color:"#ef4444",fontWeight:700,marginTop:4}}>⚠️ نفد المخزون!</div>}
+                </div>
+              );
+            })}
+          </div>
+        )}
 }
 
 function CodeConfirm({order,onConfirm}){
