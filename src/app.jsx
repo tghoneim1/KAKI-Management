@@ -33,15 +33,11 @@ const DEFAULT_PRODUCTS = [
   { id:"wings",         name:"وراك كاملة ك",         emoji:"🍗", price:190 },
   { id:"tips",          name:"دبوس ك",               emoji:"🍖", price:275 },
   { id:"shish",         name:"شيش طاوق بدون دهون ك", emoji:"🍢", price:390 },
-  { id:"shish_half",    name:"شيش طاوق ½ك",          emoji:"🍢", price:195 },
   { id:"shish_full",    name:"شيش طاوق ك",           emoji:"🍢", price:390 },
   { id:"shawarma",      name:"شاورمة بدون دهون ك",   emoji:"🌯", price:390 },
-  { id:"shawarma_half", name:"شاورمة فراخ ½ك",       emoji:"🌯", price:195 },
   { id:"shawarma_full", name:"شاورمة فراخ ك",        emoji:"🌯", price:390 },
   { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",  emoji:"🍗", price:190 },
   { id:"liver",         name:"كبدة ك",               emoji:"🫀", price:80  },
-  { id:"giblets",       name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
-  { id:"liver_giz",     name:"كبد وقوانص ك",         emoji:"🫀", price:80  },
   { id:"gizzard",       name:"قوانص ك",              emoji:"🫁", price:70  },
 ];
 
@@ -342,6 +338,7 @@ export default function App(){
   const [lang,setLang]=useState("AR");
   const [showInventory,setShowInventory]=useState(false);
   const [showStock,setShowStock]=useState(false);
+  const [showGifts,setShowGifts]=useState(false);
   const [editingOrderId,setEditingOrderId]=useState(null);
   const [editItems,setEditItems]=useState({});
   const [scaleWeights,setScaleWeights]=useState({});
@@ -837,9 +834,9 @@ export default function App(){
               return(
                 <>
                   <div style={{display:"flex",gap:5,marginBottom:12,overflowX:"auto",paddingBottom:4}}>
-                    {/* 🏪 Stock button — first, manager only */}
+                    {/* 🏪 Stock button — manager only */}
                     {role==="manager"&&(
-                      <button onClick={()=>{setShowStock(s=>!s);setShowInventory(false);}}
+                      <button onClick={()=>{setShowStock(s=>!s);setShowInventory(false);setShowGifts(false);}}
                         style={{...css.sm(showStock?"#065f46":"#1a2035"),border:`1px solid ${showStock?"#10b981":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
                         المخزن
                         <span style={{background:showStock?"rgba(0,0,0,.25)":"#10b981",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
@@ -848,8 +845,19 @@ export default function App(){
                       </button>
                     )}
 
+                    {/* 🎁 Gifts button — manager only */}
+                    {role==="manager"&&(
+                      <button onClick={()=>{setShowGifts(s=>!s);setShowInventory(false);setShowStock(false);}}
+                        style={{...css.sm(showGifts?"#6d28d9":"#1a2035"),border:`1px solid ${showGifts?"#a78bfa":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
+                        🎁 هدايا
+                        <span style={{background:showGifts?"rgba(0,0,0,.25)":"#7c3aed",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
+                          {products.filter(p=>(db.gifts?.[p.id]||0)>0).length}
+                        </span>
+                      </button>
+                    )}
+
                     {/* 📦 Inventory button */}
-                    <button onClick={()=>{setShowInventory(s=>!s);setShowStock(false);}}
+                    <button onClick={()=>{setShowInventory(s=>!s);setShowStock(false);setShowGifts(false);}}
                       style={{...css.sm(showInventory?"#1d4ed8":"#1a2035"),border:`1px solid ${showInventory?"#3b82f6":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
                       إجمالي الطلبات
                       <span style={{background:showInventory?"rgba(0,0,0,.25)":"#3b82f6",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
@@ -873,7 +881,43 @@ export default function App(){
                   </div>
 
                   {/* Inventory panel */}
-                  {showInventory&&(
+                  {/* 🎁 Gifts panel */}
+                  {showGifts&&(
+                    <div style={{background:"#1a0533",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #6d28d9"}}>
+                      <div style={{fontSize:13,color:"#a78bfa",fontWeight:700,marginBottom:6}}>🎁 الهدايا</div>
+                      <div style={{fontSize:10,color:MUT,marginBottom:10}}>زيادة الهدايا بتتخصم من المخزن تلقائياً</div>
+                      {products.map(p=>{
+                        const giftQty=db.gifts?.[p.id]||0;
+                        const stockQty=db.stock?.[p.id]||0;
+                        return(
+                          <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid #3b1f6b"}}>
+                            <span style={{fontSize:18}}>{p.emoji}</span>
+                            <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:600}}>{p.name}</div>
+                            <div style={{display:"flex",alignItems:"center",gap:4,background:"#2d1657",borderRadius:8,padding:"4px 8px"}}>
+                              <button onClick={()=>{
+                                if(giftQty<=0) return;
+                                mutate(d=>({...d,
+                                  gifts:{...(d.gifts||{}),[p.id]:(d.gifts?.[p.id]||0)-1},
+                                  stock:{...(d.stock||{}),[p.id]:(d.stock?.[p.id]||0)+1}
+                                }));
+                              }} style={{width:24,height:24,borderRadius:5,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700}}>−</button>
+                              <span style={{width:30,textAlign:"center",fontWeight:900,fontSize:15,color:"#a78bfa"}}>{giftQty}</span>
+                              <button onClick={()=>{
+                                if(stockQty<=0){T("⚠️ لا يوجد في المخزن");return;}
+                                mutate(d=>({...d,
+                                  gifts:{...(d.gifts||{}),[p.id]:(d.gifts?.[p.id]||0)+1},
+                                  stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}
+                                }));
+                              }} style={{width:24,height:24,borderRadius:5,border:"none",background:stockQty>0?"#6d28d9":"#374151",color:"#fff",cursor:stockQty>0?"pointer":"not-allowed",fontWeight:700}}>+</button>
+                            </div>
+                            <div style={{fontSize:10,color:MUT,minWidth:50,textAlign:"center"}}>
+                              مخزن: <span style={{color:"#10b981",fontWeight:700}}>{stockQty}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                     <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #1e3a5f"}}>
                       <div style={{fontSize:13,color:"#93c5fd",fontWeight:700,marginBottom:10}}>📦 الأصناف المطلوب تحضيرها</div>
                       {allItemIds.length===0
@@ -949,8 +993,8 @@ export default function App(){
                 </>
               );
             })()}
-            {!showInventory&&!showStock&&filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>لا توجد طلبات</div></div>}
-            {!showInventory&&!showStock&&filtOrders.map(order=>(
+            {!showInventory&&!showStock&&!showGifts&&filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>لا توجد طلبات</div></div>}
+            {!showInventory&&!showStock&&!showGifts&&filtOrders.map(order=>(
               <div key={order.id} style={{...css.card,borderColor:expOrder===order.id?ST_COLOR[order.status]:BDR,cursor:"pointer"}} onClick={()=>setExpOrder(expOrder===order.id?null:order.id)}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
@@ -994,6 +1038,34 @@ export default function App(){
                       <div style={{color:MUT}}>👤 {order.client}</div>
                       <div style={{color:MUT}}>📞 {order.phone}</div>
                       <div style={{color:MUT}}>📍 {order.address}</div>
+                      {/* Copy address + open location — delivery */}
+                      {(role==="delivery"||role==="manager")&&order.address&&(
+                        <div style={{display:"flex",gap:6,marginTop:6}}>
+                          <button onClick={e=>{
+                            e.stopPropagation();
+                            navigator.clipboard?.writeText(order.address).then(()=>T("📋 تم نسخ العنوان")).catch(()=>{
+                              const el=document.createElement("textarea");
+                              el.value=order.address;
+                              document.body.appendChild(el);
+                              el.select();
+                              document.execCommand("copy");
+                              document.body.removeChild(el);
+                              T("📋 تم نسخ العنوان");
+                            });
+                          }} style={{...css.sm("#1e3a5f"),fontSize:11,padding:"4px 10px"}}>
+                            📋 نسخ العنوان
+                          </button>
+                          {(order.mapsLink||order.lat)&&(
+                            <button onClick={e=>{
+                              e.stopPropagation();
+                              const url=order.mapsLink||(order.lat?`https://maps.google.com/?q=${order.lat},${order.lng}`:"");
+                              if(url) window.open(url,"_blank");
+                            }} style={{...css.sm("#065f46"),fontSize:11,padding:"4px 10px"}}>
+                              🗺️ فتح الموقع
+                            </button>
+                          )}
+                        </div>
+                      )}
                       {order.deliveryDate&&<div style={{color:MUT}}>📅 موعد الاستلام: {order.deliveryDate}</div>}
                       {order.notes&&<div style={{color:MUT}}>📝 {order.notes}</div>}
                     </div>
