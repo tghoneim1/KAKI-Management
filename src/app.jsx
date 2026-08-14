@@ -918,6 +918,8 @@ export default function App(){
                       })}
                     </div>
                   )}
+
+                  {showInventory&&(
                     <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #1e3a5f"}}>
                       <div style={{fontSize:13,color:"#93c5fd",fontWeight:700,marginBottom:10}}>📦 الأصناف المطلوب تحضيرها</div>
                       {allItemIds.length===0
