@@ -350,10 +350,7 @@ export default function App(){
   const mutate=async fn=>{const next=fn(db);setDb(next);await saveDB(next);setLastSync(Date.now());};
 
   // ── Detailed Costs State ──
-  const [costsDB,setCostsDB]=useState(()=>{
-    // Load from Firebase db if available, else fallback to localStorage
-    return loadCostsDB();
-  });
+  const [costsDB,setCostsDB]=useState(()=>loadCostsDB());
   const [costsView,setCostsView]=useState("cycles");
   const [costsSelId,setCostsSelId]=useState(()=>loadCostsDB().cycles[0]?.id);
   const [costsOpenSec,setCostsOpenSec]=useState(null);
@@ -361,38 +358,33 @@ export default function App(){
   const [costsShowNew,setCostsShowNew]=useState(false);
   const [costsEditName,setCostsEditName]=useState(false);
   const [costsNf,setCostsNf]=useState({name:"",birds:"500",startDate:"",endDate:"",notes:""});
-  const [costsEditing,setCostsEditing]=useState(false); // edit mode
+  const [costsEditing,setCostsEditing]=useState(false);
   const [costsSaving,setCostsSaving]=useState(false);
 
-  // Load costs from Firebase when db loads
-  React.useEffect(()=>{
-    if(db.costsDB){
-      setCostsDB(db.costsDB);
-      setCostsSelId(db.costsDB.cycles?.[0]?.id);
-    }
-  },[db.costsDB]);
+  // Use Firebase costsDB if available, else local
+  const activeCostsDB=db.costsDB||costsDB;
 
   const persistCosts=next=>{
     setCostsDB(next);
-    saveCostsDB(next); // keep localStorage as backup
+    saveCostsDB(next);
   };
-  
+
   const saveCotsToFirebase=async(next)=>{
     setCostsSaving(true);
     try{
-      await mutate(d=>({...d,costsDB:next}));
-      T("✅ تم حفظ التكاليف");
+      mutate(d=>({...d,costsDB:next}));
+      T("✅ تم حفظ التكاليف في Firebase");
     }catch{T("⚠️ حفظ محلي فقط");}
     setCostsSaving(false);
     setCostsEditing(false);
   };
-  const costsSel=costsDB.cycles.find(c=>c.id===costsSelId)||costsDB.cycles[0];
+  const costsSel=activeCostsDB.cycles?.find(c=>c.id===costsSelId)||activeCostsDB.cycles?.[0];
   const costsData={...EMPTY_COSTS(),...(costsSel?.costs||{})};
   const costsBirds=CN(costsSel?.birds)||500;
   const GRAND=calcCostTotal(costsData);
 
-  const updCostsData=fn=>{if(!costsEditing)return;persistCosts({...costsDB,cycles:costsDB.cycles.map(c=>c.id===costsSelId?{...c,costs:fn({...EMPTY_COSTS(),...c.costs})}:c)});};
-  const updCostsCycle=fields=>{if(!costsEditing)return;persistCosts({...costsDB,cycles:costsDB.cycles.map(c=>c.id===costsSelId?{...c,...fields}:c)});};
+  const updCostsData=fn=>{if(!costsEditing)return;persistCosts({...activeCostsDB,cycles:activeCostsDB.cycles.map(c=>c.id===costsSelId?{...c,costs:fn({...EMPTY_COSTS(),...c.costs})}:c)});};
+  const updCostsCycle=fields=>{if(!costsEditing)return;persistCosts({...activeCostsDB,cycles:activeCostsDB.cycles.map(c=>c.id===costsSelId?{...c,...fields}:c)});};
   const updCostItem=(key,id,flds)=>updCostsData(c=>({...c,[key]:(c[key]||[]).map(x=>x.id===id?{...x,...flds}:x)}));
   const delCostItem=(key,id)=>updCostsData(c=>({...c,[key]:(c[key]||[]).filter(x=>x.id!==id)}));
   const addCostItem=(key,item)=>{updCostsData(c=>({...c,[key]:[...(c[key]||[]),{id:CUID(),...item}]}));setCostsAddOpen(null);T("✅ تمت الإضافة");};
@@ -400,14 +392,14 @@ export default function App(){
   const addCostCycle=()=>{
     if(!costsNf.name.trim()){T("أدخل اسم الدورة","err");return;}
     const id=CUID();
-    persistCosts({...costsDB,cycles:[...costsDB.cycles,{id,...costsNf,status:"active",costs:EMPTY_COSTS()}]});
+    persistCosts({...activeCostsDB,cycles:[...activeCostsDB.cycles,{id,...costsNf,status:"active",costs:EMPTY_COSTS()}]});
     setCostsSelId(id);setCostsShowNew(false);setCostsNf({name:"",birds:"500",startDate:"",endDate:"",notes:""});
     setCostsView("entry");T("✅ تم إنشاء الدورة");
   };
   const delCostCycle=id=>{
     if(costsDB.cycles.length<=1){T("لا يمكن حذف الدورة الوحيدة","err");return;}
     const next=costsDB.cycles.filter(c=>c.id!==id);
-    persistCosts({...costsDB,cycles:next});setCostsSelId(next[0].id);T("🗑️ تم الحذف");
+    persistCosts({...activeCostsDB,cycles:next});setCostsSelId(next[0].id);T("🗑️ تم الحذف");
   };
   const toggleCostsSec=id=>setCostsOpenSec(id);
 
@@ -1562,12 +1554,12 @@ export default function App(){
               </div>
               {costsEditing
                 ?<>
-                  <button onClick={()=>saveCotsToFirebase(costsDB)}
+                  <button onClick={()=>saveCotsToFirebase(activeCostsDB)}
                     disabled={costsSaving}
                     style={{...css.btn("#10b981","#fff"),padding:"7px 14px",fontSize:12}}>
                     {costsSaving?"⏳ جاري الحفظ...":"💾 حفظ"}
                   </button>
-                  <button onClick={()=>{setCostsEditing(false);if(db.costsDB)setCostsDB(db.costsDB);}}
+                  <button onClick={()=>{setCostsEditing(false);setCostsDB(db.costsDB||loadCostsDB());}}
                     style={{...css.btn("#374151","#fff"),padding:"7px 14px",fontSize:12}}>
                     إلغاء
                   </button>
