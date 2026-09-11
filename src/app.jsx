@@ -33,7 +33,9 @@ const DEFAULT_PRODUCTS = [
   { id:"wings",         name:"وراك كاملة ك",         emoji:"🍗", price:190 },
   { id:"tips",          name:"دبوس ك",               emoji:"🍖", price:275 },
   { id:"shish",         name:"شيش طاوق بدون دهون ك", emoji:"🍢", price:390 },
+  { id:"shish_full",    name:"شيش طاوق ك",           emoji:"🍢", price:390 },
   { id:"shawarma",      name:"شاورمة بدون دهون ك",   emoji:"🌯", price:390 },
+  { id:"shawarma_full", name:"شاورمة فراخ ك",        emoji:"🌯", price:390 },
   { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",  emoji:"🍗", price:190 },
   { id:"liver",         name:"كبدة ك",               emoji:"🫀", price:80  },
   { id:"gizzard",       name:"قوانص ك",              emoji:"🫁", price:70  },
@@ -1099,24 +1101,65 @@ export default function App(){
                         </div>):null;
                       })}
                       {(role==="manager"||role==="delivery")&&(
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:8,paddingTop:6,borderTop:`1px solid ${BDR}`,fontWeight:800}}>
-                          <span>الإجمالي</span>
-                          {role==="manager"
-                            ?<div style={{display:"flex",alignItems:"center",gap:6}}>
-                               <span style={{fontSize:12,color:MUT}}>ج.م</span>
-                               <input
-                                 type="number"
-                                 value={order.total}
-                                 onClick={e=>e.stopPropagation()}
-                                 onChange={e=>{
-                                   const v=parseInt(e.target.value)||0;
-                                   mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,total:v}:o)}));
-                                 }}
-                                 style={{width:90,background:"#1a2035",border:"1px solid #f59e0b",borderRadius:8,color:"#f59e0b",fontWeight:900,fontSize:16,textAlign:"center",fontFamily:"'Cairo',sans-serif",padding:"4px 8px"}}
-                               />
-                             </div>
-                            :<span style={{color:"#f59e0b",fontSize:15}}>ج.م {order.total}</span>
-                          }
+                        <div style={{marginTop:8,paddingTop:6,borderTop:`1px solid ${BDR}`}}>
+                          {role==="manager"&&(
+                            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+                              <span style={{fontSize:11,color:MUT,fontWeight:600}}>خصم %</span>
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                placeholder="0"
+                                defaultValue=""
+                                onClick={e=>e.stopPropagation()}
+                                onChange={e=>{
+                                  const pct=Math.min(100,Math.max(0,parseFloat(e.target.value)||0));
+                                  const orig=order._origTotal||order.total;
+                                  const newTotal=Math.round(orig*(1-pct/100));
+                                  mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,total:newTotal,_origTotal:orig,discount:pct}:o)}));
+                                }}
+                                style={{width:60,background:"#1a2035",border:"1px solid #f59e0b",borderRadius:8,color:"#f59e0b",fontWeight:900,fontSize:14,textAlign:"center",fontFamily:"'Cairo',sans-serif",padding:"4px 8px"}}
+                              />
+                              {order.discount>0&&(
+                                <span style={{fontSize:11,color:"#10b981",fontWeight:700}}>
+                                  خصم {order.discount}% ✅
+                                </span>
+                              )}
+                              {order.discount>0&&(
+                                <button onClick={e=>{
+                                  e.stopPropagation();
+                                  mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,total:o._origTotal||o.total,discount:0,_origTotal:undefined}:o)}));
+                                }} style={{fontSize:10,background:"none",border:"none",color:"#ef4444",cursor:"pointer",fontFamily:"'Cairo',sans-serif"}}>
+                                  ✕ إلغاء
+                                </button>
+                              )}
+                            </div>
+                          )}
+                          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontWeight:800}}>
+                            <span>الإجمالي</span>
+                            {role==="manager"
+                              ?<div style={{display:"flex",alignItems:"center",gap:6}}>
+                                 <span style={{fontSize:12,color:MUT}}>ج.م</span>
+                                 <input
+                                   type="number"
+                                   value={order.total}
+                                   onClick={e=>e.stopPropagation()}
+                                   onChange={e=>{
+                                     const v=parseInt(e.target.value)||0;
+                                     mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,total:v}:o)}));
+                                   }}
+                                   style={{width:90,background:"#1a2035",border:"1px solid #f59e0b",borderRadius:8,color:"#f59e0b",fontWeight:900,fontSize:16,textAlign:"center",fontFamily:"'Cairo',sans-serif",padding:"4px 8px"}}
+                                 />
+                               </div>
+                              :<span style={{color:"#f59e0b",fontSize:15}}>ج.م {order.total}</span>
+                            }
+                          </div>
+                          {order.discount>0&&order._origTotal&&(
+                            <div style={{fontSize:11,color:MUT,textAlign:"left",marginTop:3}}>
+                              <span style={{textDecoration:"line-through"}}>ج.م {order._origTotal}</span>
+                              <span style={{color:"#10b981",marginRight:6}}>وفّرت ج.م {order._origTotal-order.total}</span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
