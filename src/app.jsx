@@ -26,16 +26,13 @@ const GOV_COLORS={"القاهرة":"#f59e0b","الجيزة":"#10b981","القا�
 
 const DEFAULT_PRODUCTS = [
   { id:"whole",         name:"فرخة كاملة",          emoji:"🐔", price:190, pricePerKg:190, byWeight:true },
-  { id:"shamoort",      name:"شامورط (750-1000 جم)",  emoji:"🐣", price:150 },
-  { id:"breast_full",   name:"صدور بالعظام ك",       emoji:"🥩", price:250 },
+  { id:"shamoort",      name:"شامورت (750-1000 جم)",  emoji:"🐣", price:150 },
   { id:"breast_deb",    name:"صدور مخلية ك",         emoji:"🥩", price:390 },
   { id:"fillet",        name:"صدور فيليه ك",         emoji:"🥩", price:390 },
   { id:"wings",         name:"وراك كاملة ك",         emoji:"🍗", price:190 },
   { id:"tips",          name:"دبوس ك",               emoji:"🍖", price:275 },
   { id:"shish",         name:"شيش طاوق بدون دهون ك", emoji:"🍢", price:390 },
-  { id:"shish_full",    name:"شيش طاوق ك",           emoji:"🍢", price:390 },
   { id:"shawarma",      name:"شاورمة بدون دهون ك",   emoji:"🌯", price:390 },
-  { id:"shawarma_full", name:"شاورمة فراخ ك",        emoji:"🌯", price:390 },
   { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",  emoji:"🍗", price:190 },
   { id:"liver",         name:"كبدة ك",               emoji:"🫀", price:80  },
   { id:"gizzard",       name:"قوانص ك",              emoji:"🫁", price:70  },
@@ -59,6 +56,76 @@ const ROLES = {
   delivery: {label:"توصيل",emoji:"🛵",pin:"2222",color:"#f97316",tabs:["orders"],canAdvance:["في الطريق","تم التسليم"],canPay:false,canDeliver:true},
   cashier:  {label:"كاشير",emoji:"💳",pin:"3333",color:"#10b981",tabs:["orders","dashboard"],canAdvance:[],canPay:true,canDeliver:false},
 };
+
+const ST_EN={"جديد":"New","قيد التحضير":"Preparing","جاهز":"Ready","في الطريق":"Out for Delivery","تم التسليم":"Delivered","تم الدفع":"Paid"};
+
+const TRANS={
+AR:{
+  appName:"إدارة الدواجن",loading:"جاري التحميل...",logout:"خروج",cycleLabel:"دورة",birds:"طائر",
+  loginTitle:"اختر دورك للدخول",enterPin:"أدخل رقم PIN",wrongPin:"PIN غلط",back:"← رجوع",
+  tabDashboard:"الرئيسية",tabNew:"طلب",tabOrders:"الطلبات",tabClients:"العملاء",tabCosts:"التكاليف",tabSettings:"الأسعار",tabStock:"المخزن",
+  orders:"طلبات",active:"نشطة",clients:"عملاء",collected:"محصل",pending:"معلق",profit:"ربح",loss:"خسارة",pipeline:"خط الإنتاج",
+  quickSearch:"بحث سريع عن عميل",whatsapp:"واتساب",manual:"يدوي",pasteWA:"الصق رسالة واتساب",analyzeMsg:"تحليل الرسالة",analyzing:"جاري التحليل...",
+  stockLabel:"المخزن",gifts:"هدايا",totalOrders:"إجمالي الطلبات",all:"الكل",
+  giftsTitle:"الهدايا",giftsNote:"زيادة الهدايا بتتخصم من المخزن تلقائياً",stockColon:"مخزن:",
+  inventoryTitle:"الأصناف المطلوب تحضيرها",noActiveOrders:"لا توجد طلبات قيد التحضير",
+  noMembership:"{t("noMembership")}",pickup:"استلام:",orderTime:"وقت الطلب",memberId:"رقم العضوية",copyAddress:"نسخ العنوان",openMap:"فتح الموقع",
+  discount:"خصم %",cancel:"إلغاء",total:"الإجمالي",savedEGP:"وفّرت ج.م",estimated:"(تقديري)",
+  editOrder:"تعديل الطلب",newTotal:"الإجمالي الجديد",save:"✅ حفظ",deleteOrder:"🗑️ مسح الطلب",
+  sendDelivery:"إرسال للتوصيل + كود للعميل",confirmCode:"كود التأكيد",recordPayment:"تسجيل الدفع",cash:"كاش",vodafone:"فودافون كاش",instapay:"انستاباي",
+  waConfirm:"تأكيد الطلب + إشعار العميل على واتساب",
+  searchClients:"🔍 ابحث بالاسم أو رقم العضوية أو الهاتف...",noClients:"لا يوجد عملاء",orderCount:"طلبات",avg:"معدل:",
+  topItems:"🏆 الأصناف المفضلة",pastOrders:"📋 الطلبات السابقة",newOrder:"➕ طلب جديد",resetStats:"🗑️ مسح الإحصائيات",updateAddress:"🔄 تحديث العنوان من آخر طلب",
+  editMode:"✏️ وضع التعديل — عدّل ثم احفظ",viewMode:"👁️ وضع العرض",saving:"⏳ جاري الحفظ...",saveBtn:"💾 حفظ",editBtn:"✏️ تعديل",
+  profitSummary:"📊 ملخص الربح",revenueLabel:"💰 إيراد",costsLbl:"📉 تكاليف",profitLbl:"📈 ربح",profitPerKg:"📦 ربح/كيلو",
+  avgWeight:"⚖️ متوسط وزن الطائر (كجم)",cyclesTab:"📋 الدورات",costEntry:"✏️ إدخال التكاليف",compareTab:"📊 مقارنة",
+  newCycle:"➕ إنشاء دورة تكاليف جديدة",cancelBtn:"✕ إلغاء",totalCosts:"إجمالي التكاليف",costPerBird:"تكلفة / طائر",
+  cyclePrice:"أسعار الدورة #",cyclePriceNote:"الأسعار مرتبطة بكل دورة — تتغير مع كل دورة جديدة",
+  hidden:"مخفي",savePricesBtn:"💾 حفظ الأسعار",pricesSaved:"✅ تم حفظ الأسعار بنجاح!",currentPrices:"📋 الأسعار الحالية",
+  stockTitle:"📦 المخزن",stockNote:"حدد الكمية المتاحة — التطبيق بيطرح الطلبات النشطة تلقائياً",
+  stockCol:"المخزن",activeOrdersCol:"طلبات نشطة",remainingCol:"المتبقي",outOfStock:"⚠️ نفد",outOfStockMsg:"⚠️ نفد المخزون — اقفل الصنف من الأسعار",
+  deliveryConfirm:"✅ تأكيد التسليم من العميل",enterClientCode:"أدخل الكود اللي أعطاك إياه العميل",confirmBtn:"✅ تأكيد",
+  pickupDate:"📅 تاريخ الاستلام",pickupSet:"موعد الاستلام:",
+  clientData:"👤 بيانات العميل",nameLabel:"الاسم *",phoneLabel:"الهاتف *",
+  setMap:"تحديد موقعك على الخريطة",mapSet:"✅ تم تحديد الموقع",optional:"اختياري",
+  myLocation:"📍 موقعي الحالي",confirmLocation:"📍 هذا موقعي ✅",mapHint:"اضغط على الخريطة أو اسحب الـ Pin",
+  govLabel:"المحافظة *",buildingLabel:"اسم العمارة *",aptLabel:"رقم الشقة *",floorLabel:"الدور (اختياري)",streetLabel:"الشارع *",
+  extraNotes:"ملاحظات إضافية (اختياري)",orderNotes:"ملاحظات الطلب",itemsTitle:"🛒 الأصناف",totalLabel:"الإجمالي",
+  unsavedEdits:"تعديل غير محفوظ",undoBtn:"↩ إلغاء",notifOn:"🔔 الإشعارات مفعلة!",notifOff:"❌ يرجى السماح بالإشعارات من إعدادات المتصفح",
+},
+EN:{
+  appName:"Poultry Mgmt",loading:"Loading...",logout:"Logout",cycleLabel:"Cycle",birds:"birds",
+  loginTitle:"Select your role",enterPin:"Enter PIN",wrongPin:"Wrong PIN",back:"← Back",
+  tabDashboard:"Dashboard",tabNew:"Order",tabOrders:"Orders",tabClients:"Clients",tabCosts:"Costs",tabSettings:"Prices",tabStock:"Stock",
+  orders:"Orders",active:"Active",clients:"Clients",collected:"Collected",pending:"Pending",profit:"Profit",loss:"Loss",pipeline:"Pipeline",
+  quickSearch:"Quick client search",whatsapp:"WhatsApp",manual:"Manual",pasteWA:"Paste WhatsApp message",analyzeMsg:"Analyze",analyzing:"Analyzing...",
+  stockLabel:"Stock",gifts:"Gifts",totalOrders:"Total Orders",all:"All",
+  giftsTitle:"Gifts",giftsNote:"Extra gifts are deducted from stock automatically",stockColon:"Stock:",
+  inventoryTitle:"Items to prepare",noActiveOrders:"No orders in preparation",
+  noMembership:"No membership",pickup:"Pickup:",orderTime:"Order time",memberId:"Member ID",copyAddress:"Copy Address",openMap:"Open Map",
+  discount:"Discount %",cancel:"Cancel",total:"Total",savedEGP:"Saved EGP",estimated:"(est.)",
+  editOrder:"Edit Order",newTotal:"New Total",save:"✅ Save",deleteOrder:"🗑️ Delete Order",
+  sendDelivery:"Send for Delivery + Client Code",confirmCode:"Confirmation Code",recordPayment:"Record Payment",cash:"Cash",vodafone:"Vodafone Cash",instapay:"InstaPay",
+  waConfirm:"Confirm Order + Notify Client on WhatsApp",
+  searchClients:"🔍 Search by name, member ID or phone...",noClients:"No clients",orderCount:"orders",avg:"Avg:",
+  topItems:"🏆 Favorite Items",pastOrders:"📋 Past Orders",newOrder:"➕ New Order",resetStats:"🗑️ Reset Stats",updateAddress:"🔄 Update from latest order",
+  editMode:"✏️ Edit Mode — modify then save",viewMode:"👁️ View Mode",saving:"⏳ Saving...",saveBtn:"💾 Save",editBtn:"✏️ Edit",
+  profitSummary:"📊 Profit Summary",revenueLabel:"💰 Revenue",costsLbl:"📉 Costs",profitLbl:"📈 Profit",profitPerKg:"📦 Profit/kg",
+  avgWeight:"⚖️ Avg bird weight (kg)",cyclesTab:"📋 Cycles",costEntry:"✏️ Enter Costs",compareTab:"📊 Compare",
+  newCycle:"➕ Create New Cycle",cancelBtn:"✕ Cancel",totalCosts:"Total Costs",costPerBird:"Cost / Bird",
+  cyclePrice:"Cycle # ",cyclePriceNote:"Prices are per cycle — they change with each new cycle",
+  hidden:"Hidden",savePricesBtn:"💾 Save Prices",pricesSaved:"✅ Prices saved!",currentPrices:"📋 Current Prices",
+  stockTitle:"📦 Stock",stockNote:"Set available quantity — app subtracts active orders automatically",
+  stockCol:"Stock",activeOrdersCol:"Active orders",remainingCol:"Remaining",outOfStock:"⚠️ Out",outOfStockMsg:"⚠️ Out of stock — disable from Prices",
+  deliveryConfirm:"✅ Delivery Confirmation",enterClientCode:"Enter the code the client gave you",confirmBtn:"✅ Confirm",
+  pickupDate:"📅 Pickup Date",pickupSet:"Pickup scheduled:",
+  clientData:"👤 Client Info",nameLabel:"Name *",phoneLabel:"Phone *",
+  setMap:"Set location on map",mapSet:"✅ Location set",optional:"Optional",
+  myLocation:"📍 My Location",confirmLocation:"📍 This is my location ✅",mapHint:"Tap the map or drag the Pin",
+  govLabel:"Governorate *",buildingLabel:"Building name *",aptLabel:"Apt # *",floorLabel:"Floor (optional)",streetLabel:"Street *",
+  extraNotes:"Additional notes (optional)",orderNotes:"Order notes",itemsTitle:"🛒 Items",totalLabel:"Total",
+  unsavedEdits:"unsaved edit(s)",undoBtn:"↩ Undo",notifOn:"🔔 Notifications enabled!",notifOff:"❌ Please allow notifications in browser settings",
+}};
 
 const BG="#0d1117",CARD="#1a2035",BDR="#252d3d",TXT="#f1f5f9",SUB="#64748b",MUT="#94a3b8";
 const css={
@@ -336,6 +403,8 @@ export default function App(){
   const [fSt,setFSt]=useState("الكل");
   const [cSearch,setCSearch]=useState("");
   const [lang,setLang]=useState("AR");
+  const t=k=>TRANS[lang][k]||k;
+  const tSt=s=>lang==="EN"?(ST_EN[s]||s):s;
   const [showInventory,setShowInventory]=useState(false);
   const [showStock,setShowStock]=useState(false);
   const [showGifts,setShowGifts]=useState(false);
@@ -601,7 +670,7 @@ export default function App(){
   const filtOrders=fSt==="الكل"?roleOrders:roleOrders.filter(o=>o.status===fSt);
   const filtClients=db.clients.filter(c=>!cSearch||c.name?.includes(cSearch)||c.phone?.includes(cSearch)||c.memberId?.includes(cSearch));
   const tabs=ro?ro.tabs:[];
-  const tabMeta={dashboard:["📊","الرئيسية"],new:["💬","طلب"],orders:["📋","الطلبات"],clients:["👥","العملاء"],costs:["💰","التكاليف"],settings:["⚙️","الأسعار"],stock:["📦","المخزن"]};
+  const tabMeta={dashboard:["📊",t("tabDashboard")],new:["💬",t("tabNew")],orders:["📋",t("tabOrders")],clients:["👥",t("tabClients")],costs:["💰",t("tabCosts")],settings:["⚙️",t("tabSettings")],stock:["📦",t("tabStock")]};
 
   // Show loading while Firebase loads
   if(!dbLoaded) return(
@@ -609,7 +678,7 @@ export default function App(){
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');*{box-sizing:border-box}body{margin:0}`}</style>
       <div style={{fontSize:52}}>🐔</div>
       <div style={{fontWeight:900,fontSize:18,color:"#f59e0b"}}>كاكي</div>
-      <div style={{fontSize:13,color:"#64748b"}}>جاري التحميل...</div>
+      <div style={{fontSize:13,color:"#64748b"}}>{TRANS[lang].loading}</div>
     </div>
   );
 
@@ -621,14 +690,14 @@ export default function App(){
         <div style={{width:"100%",maxWidth:340,padding:20}}>
           <div style={{textAlign:"center",marginBottom:28}}>
             <div style={{fontSize:52}}>🐔</div>
-            <div style={{fontWeight:900,fontSize:24,color:TXT,marginTop:8}}>إدارة الدواجن</div>
-            <div style={{fontSize:13,color:SUB,marginTop:4}}>اختر دورك للدخول</div>
+            <div style={{fontWeight:900,fontSize:24,color:TXT,marginTop:8}}>{TRANS[lang].appName}</div>
+            <div style={{fontSize:13,color:SUB,marginTop:4}}>{TRANS[lang].loginTitle}</div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
             {Object.entries(ROLES).map(([k,r])=>(
               <button key={k} onClick={()=>pickRole(k)} style={{background:CARD,border:`2px solid ${r.color}44`,borderRadius:16,padding:"18px 10px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:8,fontFamily:"'Cairo',sans-serif",width:"100%"}}>
                 <div style={{fontSize:34}}>{r.emoji}</div>
-                <div style={{fontWeight:900,fontSize:15,color:r.color}}>{r.label}</div>
+                <div style={{fontWeight:900,fontSize:15,color:r.color}}>{lang==="EN"?{manager:"Manager",kitchen:"Kitchen",delivery:"Delivery",cashier:"Cashier"}[k]:r.label}</div>
                 <div style={{fontSize:10,color:SUB,letterSpacing:3}}>● ● ● ●</div>
               </button>
             ))}
@@ -636,11 +705,11 @@ export default function App(){
         </div>
       ):(
         <div style={{width:"100%",maxWidth:280,padding:20,fontFamily:"'Cairo',sans-serif",direction:"rtl"}}>
-          <button onClick={()=>setPinTgt(null)} style={{background:"none",border:"none",color:MUT,cursor:"pointer",fontSize:13,fontFamily:"'Cairo',sans-serif",marginBottom:24}}>← رجوع</button>
+          <button onClick={()=>setPinTgt(null)} style={{background:"none",border:"none",color:MUT,cursor:"pointer",fontSize:13,fontFamily:"'Cairo',sans-serif",marginBottom:24}}>{TRANS[lang].back}</button>
           <div style={{textAlign:"center",marginBottom:24}}>
             <div style={{fontSize:40}}>{ROLES[pinTgt].emoji}</div>
-            <div style={{fontWeight:900,fontSize:20,color:ROLES[pinTgt].color,marginTop:8}}>{ROLES[pinTgt].label}</div>
-            <div style={{fontSize:12,color:SUB,marginTop:4}}>أدخل رقم PIN</div>
+            <div style={{fontWeight:900,fontSize:20,color:ROLES[pinTgt].color,marginTop:8}}>{lang==="EN"?{manager:"Manager",kitchen:"Kitchen",delivery:"Delivery",cashier:"Cashier"}[pinTgt]:ROLES[pinTgt].label}</div>
+            <div style={{fontSize:12,color:SUB,marginTop:4}}>{TRANS[lang].enterPin}</div>
           </div>
           <div style={{display:"flex",justifyContent:"center",gap:12,marginBottom:24}}>
             {[0,1,2,3].map(i=><div key={i} style={{width:14,height:14,borderRadius:"50%",background:pinIn.length>i?(pinErr?"#ef4444":ROLES[pinTgt].color):BDR,transition:"background .15s"}}/>)}
@@ -653,7 +722,7 @@ export default function App(){
               </button>
             ))}
           </div>
-          {pinErr&&<div style={{textAlign:"center",color:"#ef4444",marginTop:12,fontWeight:700,fontSize:13}}>PIN غلط</div>}
+          {pinErr&&<div style={{textAlign:"center",color:"#ef4444",marginTop:12,fontWeight:700,fontSize:13}}>{TRANS[lang].wrongPin}</div>}
         </div>
       )}
     </div>
@@ -671,8 +740,8 @@ export default function App(){
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <span style={{fontSize:26}}>🐔</span>
           <div>
-            <div style={{fontWeight:900,fontSize:17,color:"#fff"}}>إدارة الدواجن</div>
-            <div style={{fontSize:10,color:"rgba(255,255,255,.8)"}}>دورة #{currentCycle} · ٥٠٠ طائر</div>
+            <div style={{fontWeight:900,fontSize:17,color:"#fff"}}>{t("appName")}</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,.8)"}}>{t("cycleLabel")} #{currentCycle} · 500 {t("birds")}</div>
           </div>
         </div>
         <div style={{display:"flex",gap:6,alignItems:"center"}}>
@@ -683,11 +752,11 @@ export default function App(){
           <button onClick={()=>{
             if("Notification" in window){
               Notification.requestPermission().then(p=>{
-                if(p==="granted") T("🔔 الإشعارات مفعلة!");
-                else T("❌ يرجى السماح بالإشعارات من إعدادات المتصفح","err");
+                if(p==="granted") T(t("notifOn"));
+                else T(t("notifOff"),"err");
               });
             }
-          }} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",fontSize:16}} title="تفعيل الإشعارات">
+          }} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",fontSize:16}} title={lang==="EN"?"Enable notifications":"تفعيل الإشعارات"}>
             {"Notification" in window && Notification.permission==="granted"?"🔔":"🔕"}
           </button>
           {/* EN/AR Toggle */}
@@ -699,7 +768,7 @@ export default function App(){
             </div>
             <span style={{fontSize:9,fontWeight:800,color:lang==="EN"?"#fff":"rgba(255,255,255,.5)"}}>EN</span>
           </div>
-          <button onClick={()=>{setRole(null);setPinScr(true);setPinTgt(null);}} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:"#fff",fontSize:11,fontFamily:"'Cairo',sans-serif"}}>{lang==="EN"?"Logout":"خروج"}</button>
+          <button onClick={()=>{setRole(null);setPinScr(true);setPinTgt(null);}} style={{background:"rgba(0,0,0,.25)",border:"none",borderRadius:8,padding:"5px 8px",cursor:"pointer",color:"#fff",fontSize:11,fontFamily:"'Cairo',sans-serif"}}>{t("logout")}</button>
         </div>
       </div>
 
@@ -718,20 +787,20 @@ export default function App(){
         {view==="dashboard"&&(
           <div className="fd">
             <div style={{display:"flex",gap:8,marginBottom:10}}>
-              <div style={css.stat("#3b82f6")}><div style={{fontSize:20,fontWeight:900,color:"#3b82f6"}}>{stats.total}</div><div style={{fontSize:11,color:MUT}}>📦 طلبات</div></div>
-              <div style={css.stat("#f59e0b")}><div style={{fontSize:20,fontWeight:900,color:"#f59e0b"}}>{stats.active}</div><div style={{fontSize:11,color:MUT}}>🔥 نشطة</div></div>
-              <div style={css.stat("#a78bfa")}><div style={{fontSize:20,fontWeight:900,color:"#a78bfa"}}>{stats.clients}</div><div style={{fontSize:11,color:MUT}}>👥 عملاء</div></div>
+              <div style={css.stat("#3b82f6")}><div style={{fontSize:20,fontWeight:900,color:"#3b82f6"}}>{stats.total}</div><div style={{fontSize:11,color:MUT}}>{t("orders")}</div></div>
+              <div style={css.stat("#f59e0b")}><div style={{fontSize:20,fontWeight:900,color:"#f59e0b"}}>{stats.active}</div><div style={{fontSize:11,color:MUT}}>{t("active")}</div></div>
+              <div style={css.stat("#a78bfa")}><div style={{fontSize:20,fontWeight:900,color:"#a78bfa"}}>{stats.clients}</div><div style={{fontSize:11,color:MUT}}>{t("clients")}</div></div>
             </div>
             <div style={{display:"flex",gap:8,marginBottom:12}}>
-              <div style={css.stat("#10b981")}><div style={{fontSize:15,fontWeight:900,color:"#10b981"}}>ج.م {stats.revenue}</div><div style={{fontSize:11,color:MUT}}>💰 محصل</div></div>
-              <div style={css.stat("#f97316")}><div style={{fontSize:15,fontWeight:900,color:"#f97316"}}>ج.م {stats.pending}</div><div style={{fontSize:11,color:MUT}}>⏳ معلق</div></div>
-              <div style={css.stat(profit>=0?"#10b981":"#ef4444")}><div style={{fontSize:15,fontWeight:900,color:profit>=0?"#10b981":"#ef4444"}}>ج.م {profit}</div><div style={{fontSize:11,color:MUT}}>{profit>=0?"📈 ربح":"📉 خسارة"}</div></div>
+              <div style={css.stat("#10b981")}><div style={{fontSize:15,fontWeight:900,color:"#10b981"}}>ج.م {stats.revenue}</div><div style={{fontSize:11,color:MUT}}>{t("collected")}</div></div>
+              <div style={css.stat("#f97316")}><div style={{fontSize:15,fontWeight:900,color:"#f97316"}}>ج.م {stats.pending}</div><div style={{fontSize:11,color:MUT}}>{t("pending")}</div></div>
+              <div style={css.stat(profit>=0?"#10b981":"#ef4444")}><div style={{fontSize:15,fontWeight:900,color:profit>=0?"#10b981":"#ef4444"}}>ج.م {profit}</div><div style={{fontSize:11,color:MUT}}>{profit>=0?profit>=0?t("profit"):t("loss")}</div></div>
             </div>
             <div style={css.card}>
-              <div style={{fontWeight:800,fontSize:13,marginBottom:10}}>⚡ خط الإنتاج</div>
+              <div style={{fontWeight:800,fontSize:13,marginBottom:10}}>{t("pipeline")}</div>
               {ST_FLOW.slice(0,5).map(st=>{const n=db.orders.filter(o=>o.status===st).length;return(
                 <div key={st} style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:7}}>
-                  <div style={{display:"flex",alignItems:"center",gap:7}}><span style={{fontSize:13}}>{ST_ICON[st]}</span><span style={{fontSize:12,color:"#cbd5e1"}}>{st}</span></div>
+                  <div style={{display:"flex",alignItems:"center",gap:7}}><span style={{fontSize:13}}>{ST_ICON[st]}</span><span style={{fontSize:12,color:"#cbd5e1"}}>{tSt(st)}</span></div>
                   <div style={{display:"flex",alignItems:"center",gap:7}}>
                     <div style={{height:5,borderRadius:3,background:ST_COLOR[st]+"33",width:70,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.min(100,n*30)}%`,background:ST_COLOR[st],borderRadius:3}}/></div>
                     <span style={{fontSize:12,fontWeight:700,color:ST_COLOR[st],minWidth:16,textAlign:"center"}}>{n}</span>
@@ -747,12 +816,12 @@ export default function App(){
           <div className="fd">
             {/* Member quick search */}
             <div style={{...css.card,borderColor:"#a78bfa44",marginBottom:12}}>
-              <div style={{fontWeight:800,fontSize:13,color:"#a78bfa",marginBottom:8}}>🔍 بحث سريع عن عميل</div>
+              <div style={{fontWeight:800,fontSize:13,color:"#a78bfa",marginBottom:8}}>{t("quickSearch")}</div>
               <div style={{display:"flex",gap:8}}>
-                <input style={{...css.inp,flex:1,marginBottom:0}} placeholder="اسم أو رقم عضوية (MBR-001) أو هاتف"
+                <input style={{...css.inp,flex:1,marginBottom:0}} placeholder={lang==="AR"?"اسم أو رقم عضوية (MBR-001) أو هاتف":"Name, member ID or phone"}
                   value={form.memberSearch} onChange={e=>setForm(f=>({...f,memberSearch:e.target.value}))}
                   onKeyDown={e=>e.key==="Enter"&&searchMember()}/>
-                <button onClick={searchMember} style={{...css.btn("#a78bfa","#fff"),width:"auto",padding:"0 14px",marginTop:0,flexShrink:0}}>بحث</button>
+                <button onClick={searchMember} style={{...css.btn("#a78bfa","#fff"),width:"auto",padding:"0 14px",marginTop:0,flexShrink:0}}>{lang==="AR"?"بحث":"Search"}</button>
               </div>
               {memberHint&&(
                 <div style={{marginTop:8,background:BG,borderRadius:10,padding:"8px 12px",border:"1px solid #a78bfa44"}}>
@@ -762,7 +831,7 @@ export default function App(){
                       <div style={{fontSize:11,color:MUT}}>{memberHint.memberId} · {memberHint.phone}</div>
                     </div>
                     <div style={{textAlign:"left"}}>
-                      <div style={{fontSize:12,color:"#10b981",fontWeight:700}}>{memberHint.totalOrders} طلبات</div>
+                      <div style={{fontSize:12,color:"#10b981",fontWeight:700}}>{memberHint.totalOrders} {t("orderCount")}</div>
                       <div style={{fontSize:12,color:"#f59e0b",fontWeight:700}}>ج.م {memberHint.totalSpent}</div>
                     </div>
                   </div>
@@ -771,16 +840,16 @@ export default function App(){
             </div>
 
             <div style={{display:"flex",background:CARD,borderRadius:12,padding:4,marginBottom:12,border:`1px solid ${BDR}`}}>
-              {[["whatsapp","💬 واتساب"],["manual","✍️ يدوي"]].map(([m,l])=>(
+              {[["whatsapp",`💬 ${t("whatsapp")}`],["manual",`✍️ ${t("manual")}`]].map(([m,l])=>(
                 <button key={m} onClick={()=>setOMode(m)} style={{flex:1,padding:"9px",border:"none",borderRadius:10,background:oMode===m?"#d97706":"transparent",color:oMode===m?"#000":MUT,fontWeight:800,fontSize:13,fontFamily:"'Cairo',sans-serif",cursor:"pointer"}}>{l}</button>
               ))}
             </div>
             {oMode==="whatsapp"&&!parsed&&(
               <div style={{...css.card,borderColor:"#25D36644"}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><span style={{fontSize:20}}>💬</span><div style={{fontWeight:800,fontSize:14,color:"#25D366"}}>الصق رسالة واتساب</div></div>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><span style={{fontSize:20}}>💬</span><div style={{fontWeight:800,fontSize:14,color:"#25D366"}}>{t("pasteWA")}</div></div>
                 <textarea style={{...css.inp,minHeight:100,resize:"vertical"}} placeholder={"مثال:\nمحمد، فرخة كاملة واجنحة\nمدينة نصر، 01001234567"} value={waMsg} onChange={e=>setWaMsg(e.target.value)}/>
                 <button style={{...css.btn("#25D366","#fff"),opacity:parsing?.7:1}} onClick={handleWA} disabled={parsing}>
-                  {parsing?<span className="pl">⏳ جاري التحليل...</span>:"🤖 تحليل الرسالة"}
+                  {parsing?<span className="pl">⏳ {t("analyzing")}</span>:`🤖 ${t("analyzeMsg")}`}
                 </button>
               </div>
             )}
@@ -797,8 +866,8 @@ export default function App(){
                       </div>
                     :<div style={{display:"flex",alignItems:"center",gap:8}}><span>🆕</span><div style={{fontWeight:700,color:"#3b82f6",fontSize:13}}>عميل جديد — سيُعطى رقم عضوية تلقائياً</div></div>}
                 </div>
-                <DeliveryDateField form={form} setForm={setForm} css={css}/>
-                <OrderForm form={form} setForm={setForm} setQty={setQty} products={products}/>
+                <DeliveryDateField lang={lang} form={form} setForm={setForm} css={css}/>
+                <OrderForm lang={lang} form={form} setForm={setForm} setQty={setQty} products={products}/>
                 <div style={{display:"flex",gap:8}}>
                   <button style={{...css.btn("#374151","#fff"),flex:1,marginTop:0}} onClick={()=>{setParsed(null);setMatchedC(null);setWaMsg("");setMemberHint(null);}}>↩ رجوع</button>
                   <button style={{...css.btn("#d97706","#000"),flex:2,marginTop:0}} onClick={submit}>✅ تأكيد</button>
@@ -808,7 +877,7 @@ export default function App(){
             {oMode==="manual"&&(
               <div>
                 <DeliveryDateField form={form} setForm={setForm} css={css}/>
-                <OrderForm form={form} setForm={setForm} setQty={setQty} products={products} showClient/>
+                <OrderForm lang={lang} form={form} setForm={setForm} setQty={setQty} products={products} showClient/>
                 <button style={css.btn("#d97706","#000")} onClick={submit}>✅ تأكيد الطلب</button>
               </div>
             )}
@@ -825,9 +894,9 @@ export default function App(){
                 <div>
                   <div style={{fontWeight:700,fontSize:13,color:ro.color}}>{ro.label}</div>
                   <div style={{fontSize:11,color:MUT}}>
-                    {role==="kitchen"&&"بتشوف: الطلبات الجديدة وقيد التحضير"}
-                    {role==="delivery"&&"بتشوف: الطلبات الجاهزة وفي الطريق"}
-                    {role==="cashier"&&"بتشوف: الطلبات اللي محتاجة تحصيل"}
+                    {role==="kitchen"&&lang==="AR"?"بتشوف: الطلبات الجديدة وقيد التحضير":"Viewing: New & In-Preparation orders"}
+                    {role==="delivery"&&lang==="AR"?"بتشوف: الطلبات الجاهزة وفي الطريق":"Viewing: Ready & Out-for-Delivery orders"}
+                    {role==="cashier"&&lang==="AR"?"بتشوف: الطلبات اللي محتاجة تحصيل":"Viewing: Orders awaiting payment"}
                   </div>
                 </div>
                 <div style={{marginRight:"auto",fontWeight:900,fontSize:18,color:ro.color}}>{roleOrders.length}</div>
@@ -856,7 +925,7 @@ export default function App(){
                     {role==="manager"&&(
                       <button onClick={()=>{setShowStock(s=>!s);setShowInventory(false);setShowGifts(false);}}
                         style={{...css.sm(showStock?"#065f46":"#1a2035"),border:`1px solid ${showStock?"#10b981":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
-                        المخزن
+                        {t("stockLabel")}
                         <span style={{background:showStock?"rgba(0,0,0,.25)":"#10b981",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
                           {products.filter(p=>(db.stock?.[p.id]||0)>0).length}
                         </span>
@@ -867,7 +936,7 @@ export default function App(){
                     {role==="manager"&&(
                       <button onClick={()=>{setShowGifts(s=>!s);setShowInventory(false);setShowStock(false);}}
                         style={{...css.sm(showGifts?"#6d28d9":"#1a2035"),border:`1px solid ${showGifts?"#a78bfa":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
-                        🎁 هدايا
+                        {`🎁 ${t("gifts")}`}
                         <span style={{background:showGifts?"rgba(0,0,0,.25)":"#7c3aed",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
                           {products.filter(p=>(db.gifts?.[p.id]||0)>0).length}
                         </span>
@@ -877,7 +946,7 @@ export default function App(){
                     {/* 📦 Inventory button */}
                     <button onClick={()=>{setShowInventory(s=>!s);setShowStock(false);setShowGifts(false);}}
                       style={{...css.sm(showInventory?"#1d4ed8":"#1a2035"),border:`1px solid ${showInventory?"#3b82f6":BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
-                      إجمالي الطلبات
+                      {t("totalOrders")}
                       <span style={{background:showInventory?"rgba(0,0,0,.25)":"#3b82f6",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>
                         {allItemIds.length}
                       </span>
@@ -891,7 +960,7 @@ export default function App(){
                       return(
                         <button key={st} onClick={()=>{setFSt(st);setShowInventory(false);setShowStock(false);}}
                           style={{...css.sm(active?col:"#1a2035"),border:`1px solid ${active?col:BDR}`,whiteSpace:"nowrap",flexShrink:0,padding:"5px 10px",display:"flex",alignItems:"center",gap:5}}>
-                          {st}
+                          {st==="الكل"?t("all"):tSt(st)}
                           <span style={{background:active?"rgba(0,0,0,.25)":col,color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:12,fontWeight:900,minWidth:20,textAlign:"center"}}>{count}</span>
                         </button>
                       );
@@ -902,8 +971,8 @@ export default function App(){
                   {/* 🎁 Gifts panel */}
                   {showGifts&&(
                     <div style={{background:"#1a0533",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #6d28d9"}}>
-                      <div style={{fontSize:13,color:"#a78bfa",fontWeight:700,marginBottom:6}}>🎁 الهدايا</div>
-                      <div style={{fontSize:10,color:MUT,marginBottom:10}}>زيادة الهدايا بتتخصم من المخزن تلقائياً</div>
+                      <div style={{fontSize:13,color:"#a78bfa",fontWeight:700,marginBottom:6}}>{`🎁 ${t("giftsTitle")}`}</div>
+                      <div style={{fontSize:10,color:MUT,marginBottom:10}}>{t("giftsNote")}</div>
                       {products.map(p=>{
                         const giftQty=db.gifts?.[p.id]||0;
                         const stockQty=db.stock?.[p.id]||0;
@@ -929,7 +998,7 @@ export default function App(){
                               }} style={{width:24,height:24,borderRadius:5,border:"none",background:stockQty>0?"#6d28d9":"#374151",color:"#fff",cursor:stockQty>0?"pointer":"not-allowed",fontWeight:700}}>+</button>
                             </div>
                             <div style={{fontSize:10,color:MUT,minWidth:50,textAlign:"center"}}>
-                              مخزن: <span style={{color:"#10b981",fontWeight:700}}>{stockQty}</span>
+                              {t("stockColon")} <span style={{color:"#10b981",fontWeight:700}}>{stockQty}</span>
                             </div>
                           </div>
                         );
@@ -939,9 +1008,9 @@ export default function App(){
 
                   {showInventory&&(
                     <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #1e3a5f"}}>
-                      <div style={{fontSize:13,color:"#93c5fd",fontWeight:700,marginBottom:10}}>📦 الأصناف المطلوب تحضيرها</div>
+                      <div style={{fontSize:13,color:"#93c5fd",fontWeight:700,marginBottom:10}}>{t("inventoryTitle")}</div>
                       {allItemIds.length===0
-                        ?<div style={{textAlign:"center",color:SUB,fontSize:12,padding:"16px"}}>✅ لا توجد طلبات قيد التحضير</div>
+                        ?<div style={{textAlign:"center",color:SUB,fontSize:12,padding:"16px"}}>{`✅ ${t("noActiveOrders")}`}</div>
                         :allItemIds.map(id=>{
                           const p=products.find(x=>x.id===id);
                           const qty=pendingItems[id]||0;
@@ -962,7 +1031,7 @@ export default function App(){
                       {/* Stock panel */}
                   {showStock&&(
                     <div style={{background:"#0d1929",borderRadius:12,padding:"12px",marginBottom:12,border:"1px solid #064e3b"}}>
-                      <div style={{fontSize:13,color:"#10b981",fontWeight:700,marginBottom:10}}>🏪 المخزن</div>
+                      <div style={{fontSize:13,color:"#10b981",fontWeight:700,marginBottom:10}}>{`🏪 ${t("stockLabel")}`}</div>
                       {products.map(p=>{
                         const stockQty=db.stock?.[p.id]||0;
                         const ordered=db.orders.filter(o=>["جديد","قيد التحضير"].includes(o.status)).reduce((s,o)=>s+(o.items?.[p.id]||0),0);
@@ -974,7 +1043,7 @@ export default function App(){
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                               <span style={{fontSize:18}}>{p.emoji}</span>
                               <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:700}}>{p.name}</div>
-                              {outOfStock&&<span style={{background:"#ef4444",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800}}>⚠️ نفد</span>}
+                              {outOfStock&&<span style={{background:"#ef4444",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800}}>{t("outOfStock")}</span>}
                             </div>
                             {/* Stock controls + formula */}
                             <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -993,12 +1062,12 @@ export default function App(){
                               {/* Formula */}
                               <span style={{color:"#64748b",fontSize:13}}>−</span>
                               <div style={{background:"#1a2035",borderRadius:8,padding:"5px 12px",textAlign:"center"}}>
-                                <div style={{fontSize:9,color:"#f97316",marginBottom:2}}>طلبات</div>
+                                <div style={{fontSize:9,color:"#f97316",marginBottom:2}}>{t("orders")}</div>
                                 <div style={{fontSize:15,fontWeight:900,color:"#f97316"}}>{ordered}</div>
                               </div>
                               <span style={{color:"#64748b",fontSize:13}}>=</span>
                               <div style={{background:outOfStock?"#7c2d1244":remaining<=3&&stockQty>0?"#78350f44":"#1a2035",borderRadius:8,padding:"5px 12px",textAlign:"center",flex:1}}>
-                                <div style={{fontSize:9,color:MUT,marginBottom:2}}>المتبقي</div>
+                                <div style={{fontSize:9,color:MUT,marginBottom:2}}>{t("remainingCol")}</div>
                                 <div style={{fontSize:15,fontWeight:900,color:stockQty===0?"#64748b":outOfStock?"#ef4444":remaining<=3?"#f59e0b":"#10b981"}}>
                                   {stockQty===0?"—":remaining}
                                 </div>
@@ -1007,13 +1076,13 @@ export default function App(){
                           </div>
                         );
                       })}
-                      <div style={{marginTop:8,fontSize:10,color:MUT,textAlign:"center"}}>المخزن − الطلبات النشطة = المتبقي</div>
+                      <div style={{marginTop:8,fontSize:10,color:MUT,textAlign:"center"}}>{lang==="AR"?"المخزن − الطلبات النشطة = المتبقي":"Stock − Active orders = Remaining"}</div>
                     </div>
                   )}
                 </>
               );
             })()}
-            {!showInventory&&!showStock&&!showGifts&&filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>لا توجد طلبات</div></div>}
+            {!showInventory&&!showStock&&!showGifts&&filtOrders.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:SUB}}><div style={{fontSize:48}}>📭</div><div style={{marginTop:8,fontWeight:600}}>{lang==="AR"?"لا توجد طلبات":"No orders"}</div></div>}
             {!showInventory&&!showStock&&!showGifts&&filtOrders.map(order=>(
               <div key={order.id} style={{...css.card,borderColor:expOrder===order.id?ST_COLOR[order.status]:BDR,cursor:"pointer"}} onClick={()=>setExpOrder(expOrder===order.id?null:order.id)}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
@@ -1031,11 +1100,11 @@ export default function App(){
                     {order.memberId
                       ?<div style={{fontSize:12,color:"#a78bfa",marginTop:3,fontWeight:800,letterSpacing:1}}>🎫 {order.memberId}</div>
                       :<div style={{fontSize:11,color:SUB,marginTop:2}}>🎫 بدون عضوية</div>}
-                    {order.deliveryDate&&<div style={{fontSize:11,color:"#f59e0b",marginTop:2}}>📅 استلام: {order.deliveryDate}</div>}
+                    {order.deliveryDate&&<div style={{fontSize:11,color:"#f59e0b",marginTop:2}}>{`📅 ${t("pickup")}`} {order.deliveryDate}</div>}
                     {order.deliveryService&&<div style={{fontSize:11,color:"#10b981",marginTop:2}}>🛵 {order.deliveryService}</div>}
                   </div>
                   <div style={{textAlign:"left"}}>
-                    <span style={css.badge(order.status)}>{ST_ICON[order.status]} {order.status}</span>
+                    <span style={css.badge(order.status)}>{ST_ICON[order.status]} {tSt(order.status)}</span>
                     <div style={{fontSize:15,fontWeight:900,color:"#f59e0b",marginTop:4,textAlign:"center"}}>ج.م {order.total}</div>
                   </div>
                 </div>
@@ -1046,13 +1115,13 @@ export default function App(){
                     {/* Client & order info */}
                     <div style={{background:BG,borderRadius:10,padding:"10px 12px",marginBottom:10,fontSize:12,lineHeight:2}}>
                       <div style={{display:"flex",justifyContent:"space-between",borderBottom:`1px solid ${BDR}`,paddingBottom:4,marginBottom:4}}>
-                        <span style={{color:"#3b82f6",fontWeight:700}}>🕐 وقت الطلب</span>
+                        <span style={{color:"#3b82f6",fontWeight:700}}>{`🕐 ${t("orderTime")}`}</span>
                         <span style={{color:"#3b82f6",fontWeight:700}}>
                           {(()=>{try{const d=new Date(order.createdAt);return `${d.toLocaleDateString("ar-EG",{day:"numeric",month:"short",year:"numeric"})} ${d.toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"})}`;}catch{return ago(order.createdAt);}})()}
                         </span>
                       </div>
                       <div style={{display:"flex",justifyContent:"space-between",borderBottom:`1px solid ${BDR}`,paddingBottom:4,marginBottom:4}}>
-                        <span style={{color:"#a78bfa",fontWeight:700}}>🎫 رقم العضوية</span>
+                        <span style={{color:"#a78bfa",fontWeight:700}}>{`🎫 ${t("memberId")}`}</span>
                         <span style={{color:"#a78bfa",fontWeight:900,fontSize:14,letterSpacing:2}}>{order.memberId||"—"}</span>
                       </div>
                       <div style={{color:MUT}}>👤 {order.client}</div>
@@ -1073,7 +1142,7 @@ export default function App(){
                               T("📋 تم نسخ العنوان");
                             });
                           }} style={{...css.sm("#1e3a5f"),fontSize:11,padding:"4px 10px"}}>
-                            📋 نسخ العنوان
+                            {`📋 ${t("copyAddress")}`}
                           </button>
                           {(order.mapsLink||order.lat)&&(
                             <button onClick={e=>{
@@ -1081,12 +1150,12 @@ export default function App(){
                               const url=order.mapsLink||(order.lat?`https://maps.google.com/?q=${order.lat},${order.lng}`:"");
                               if(url) window.open(url,"_blank");
                             }} style={{...css.sm("#065f46"),fontSize:11,padding:"4px 10px"}}>
-                              🗺️ فتح الموقع
+                              {`🗺️ ${t("openMap")}`}
                             </button>
                           )}
                         </div>
                       )}
-                      {order.deliveryDate&&<div style={{color:MUT}}>📅 موعد الاستلام: {order.deliveryDate}</div>}
+                      {order.deliveryDate&&<div style={{color:MUT}}>{`📅 ${t("pickupSet")} ${order.deliveryDate}`}</div>}
                       {order.notes&&<div style={{color:MUT}}>📝 {order.notes}</div>}
                     </div>
 
@@ -1104,7 +1173,7 @@ export default function App(){
                         <div style={{marginTop:8,paddingTop:6,borderTop:`1px solid ${BDR}`}}>
                           {role==="manager"&&(
                             <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
-                              <span style={{fontSize:11,color:MUT,fontWeight:600}}>خصم %</span>
+                              <span style={{fontSize:11,color:MUT,fontWeight:600}}>{t("discount")}</span>
                               <input
                                 type="number"
                                 min="0"
@@ -1157,7 +1226,7 @@ export default function App(){
                           {order.discount>0&&order._origTotal&&(
                             <div style={{fontSize:11,color:MUT,textAlign:"left",marginTop:3}}>
                               <span style={{textDecoration:"line-through"}}>ج.م {order._origTotal}</span>
-                              <span style={{color:"#10b981",marginRight:6}}>وفّرت ج.م {order._origTotal-order.total}</span>
+                              <span style={{color:"#10b981",marginRight:6}}>{`${t("savedEGP")} ${order._origTotal-order.total}`}</span>
                             </div>
                           )}
                         </div>
@@ -1170,7 +1239,7 @@ export default function App(){
                         e.stopPropagation();
                         const itemLines=Object.entries(order.items||{}).filter(([,q])=>q>0).map(([id,qty])=>{
                           const p=products.find(x=>x.id===id);
-                          return p?`${p.emoji} ${p.name} × ${qty} = ج.م ${getUnitPrice(p)*qty}${p.byWeight?" (تقديري)":""}`:null;
+                          return p?`${p.emoji} ${p.name} × ${qty} = ج.م ${getUnitPrice(p)*qty}${p.byWeight?` (${t("estimated")})`:""}`:null;
                         }).filter(Boolean).join("\n");
                         const msg=`✅ تم تأكيد طلبك — دواجن كاكي\n━━━━━━━━━━━━\n👤 ${order.client}\n📋 رقم الطلب: ${order.id}\n━━━━━━━━━━━━\n${itemLines}\n━━━━━━━━━━━━\n💰 الإجمالي: ج.م ${order.total}\n⏰ سيتم التواصل معك قريباً لتحديد موعد التسليم\n━━━━━━━━━━━━\nشكراً لثقتك في كاكي 🐔`;
                         window.open(`https://wa.me/${order.phone.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(msg)}`,"_blank");
@@ -1178,7 +1247,7 @@ export default function App(){
                         advance(order.id);
                         T("✅ تم تأكيد الطلب وإرسال واتساب للعميل");
                       }} style={{...css.btn("#10b981","#fff"),marginBottom:8}}>
-                        ✅ تأكيد الطلب + إشعار العميل على واتساب
+                        {t("waConfirm")}
                       </button>
                     )}
 
@@ -1219,7 +1288,7 @@ export default function App(){
                         setTimeout(()=>window.open(`https://wa.me/${order.phone?.replace(/[^0-9]/g,"")}?text=${encodeURIComponent(msg)}`,"_blank"),300);
                         T("🛵 تم الإرسال وكود التأكيد اتبعت للعميل");
                       }} style={css.btn("#f97316","#fff")}>
-                        🛵 إرسال للتوصيل + كود للعميل
+                        {`🛵 ${t("sendDelivery")}`}
                       </button>
                     )}
 
@@ -1228,7 +1297,7 @@ export default function App(){
                       <div style={{marginTop:8}}>
                         {order.confirmCode&&(
                           <div style={{background:"#f9731611",border:"1px solid #f97316",borderRadius:10,padding:"10px 14px",marginBottom:10}}>
-                            <div style={{fontSize:11,color:MUT,marginBottom:4}}>🔐 كود التأكيد المرسل للعميل</div>
+                            <div style={{fontSize:11,color:MUT,marginBottom:4}}>{`🔐 ${t("confirmCode")}`}</div>
                             <div style={{fontSize:28,fontWeight:900,color:"#f97316",textAlign:"center",letterSpacing:8}}>{order.confirmCode}</div>
                             <div style={{fontSize:11,color:MUT,textAlign:"center",marginTop:4}}>اطلب من العميل يقولك الكود</div>
                             {/* Resend code */}
@@ -1242,7 +1311,7 @@ export default function App(){
                           </div>
                         )}
                         {/* Code input for delivery confirmation */}
-                        <CodeConfirm order={order} onConfirm={(code)=>{
+                        <CodeConfirm lang={lang} order={order} onConfirm={(code)=>{
                           if(code===order.confirmCode){
                             mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,status:"تم التسليم",confirmedAt:Date.now(),confirmedCode:code}:o)}));
                             T("✅ تم تأكيد التسليم من المندوب والعميل!");
@@ -1337,8 +1406,8 @@ export default function App(){
                     {/* Payment */}
                     {ro.canPay&&order.status==="تم التسليم"&&!order.paymentMethod&&(
                       <div style={{marginTop:8}}>
-                        <div style={{fontSize:11,color:MUT,marginBottom:5,fontWeight:700}}>💳 تسجيل الدفع</div>
-                        <div style={{display:"flex",gap:6}}>{["كاش","فودافون كاش","انستاباي"].map(m=><button key={m} onClick={e=>{e.stopPropagation();pay(order.id,m);}} style={css.sm("#059669")}>{m}</button>)}</div>
+                        <div style={{fontSize:11,color:MUT,marginBottom:5,fontWeight:700}}>{`💳 ${t("recordPayment")}`}</div>
+                        <div style={{display:"flex",gap:6}}>{[lang==="AR"?"كاش":t("cash"),lang==="AR"?"فودافون كاش":t("vodafone"),lang==="AR"?"انستاباي":t("instapay")].map(m=><button key={m} onClick={e=>{e.stopPropagation();pay(order.id,m);}} style={css.sm("#059669")}>{m}</button>)}</div>
                       </div>
                     )}
                     {order.paymentMethod&&<div style={{marginTop:8,fontSize:13,color:"#10b981",fontWeight:700}}>✅ تم الدفع بـ {order.paymentMethod}</div>}
@@ -1349,7 +1418,7 @@ export default function App(){
                       editingOrderId===order.id
                       ?(
                         <div style={{marginTop:12,background:"#0d1929",borderRadius:10,padding:"12px",border:"1px solid #1e3a5f"}}>
-                          <div style={{fontSize:12,color:"#93c5fd",fontWeight:700,marginBottom:10}}>✏️ تعديل الطلب</div>
+                          <div style={{fontSize:12,color:"#93c5fd",fontWeight:700,marginBottom:10}}>{t("editOrder")}</div>
                           {products.map(p=>{
                             const qty=editItems[p.id]||0;
                             return(
@@ -1364,7 +1433,7 @@ export default function App(){
                           })}
                           {/* New total preview */}
                           <div style={{borderTop:"1px solid #1e3a5f",paddingTop:8,marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                            <span style={{fontSize:12,color:"#94a3b8"}}>الإجمالي الجديد</span>
+                            <span style={{fontSize:12,color:"#94a3b8"}}>{t("newTotal")}</span>
                             <span style={{fontSize:15,fontWeight:900,color:"#f59e0b"}}>
                               ج.م {Object.entries(editItems).reduce((s,[id,q])=>{const p=products.find(x=>x.id===id);return s+(p?getUnitPrice(p)*(q||0):0);},0)}
                             </span>
@@ -1377,8 +1446,8 @@ export default function App(){
                               mutate(d=>({...d,orders:d.orders.map(o=>o.id===order.id?{...o,items:cleanItems,total:newTotal}:o)}));
                               setEditingOrderId(null);
                               T("✅ تم تعديل الطلب");
-                            }} style={{...css.btn("#059669","#fff"),flex:1}}>✅ حفظ</button>
-                            <button onClick={e=>{e.stopPropagation();setEditingOrderId(null);}} style={{...css.btn("#374151","#fff"),flex:1}}>إلغاء</button>
+                            }} style={{...css.btn("#059669","#fff"),flex:1}}>{t("save")}</button>
+                            <button onClick={e=>{e.stopPropagation();setEditingOrderId(null);}} style={{...css.btn("#374151","#fff"),flex:1}}>{t("cancel")}</button>
                           </div>
                         </div>
                       ):(
@@ -1387,7 +1456,7 @@ export default function App(){
                           setEditItems({...order.items});
                           setEditingOrderId(order.id);
                         }} style={{...css.sm("#1d4ed8"),width:"100%",marginTop:10,display:"block",textAlign:"center",padding:"8px"}}>
-                          ✏️ تعديل الطلب
+                          {t("editOrder")}
                         </button>
                       )
                     )}
@@ -1402,7 +1471,7 @@ export default function App(){
                           T("🗑️ تم مسح الطلب");
                         }
                       }} style={{...css.sm("#ef4444"),width:"100%",marginTop:6,display:"block",textAlign:"center",padding:"8px"}}>
-                        🗑️ مسح الطلب
+                        {`🗑️ ${lang==="AR"?"مسح الطلب":"Delete Order"}`}
                       </button>
                     )}
                   </div>
@@ -1415,7 +1484,7 @@ export default function App(){
         {/* ══ CLIENTS ══ */}
         {view==="clients"&&(
           <div className="fd">
-            <input style={{...css.inp,marginBottom:8}} placeholder="🔍 ابحث بالاسم أو رقم العضوية أو الهاتف..." value={cSearch} onChange={e=>setCSearch(e.target.value)}/>
+            <input style={{...css.inp,marginBottom:8}} placeholder={t("searchClients")} value={cSearch} onChange={e=>setCSearch(e.target.value)}/>
 
             {/* Manager: fix duplicate member IDs */}
             {role==="manager"&&(()=>{
@@ -1446,7 +1515,7 @@ export default function App(){
               ):null;
             })()}
 
-            {filtClients.length===0&&<div style={{textAlign:"center",padding:"30px",color:SUB}}><div style={{fontSize:40}}>👤</div><div style={{marginTop:8}}>لا يوجد عملاء</div></div>}
+            {filtClients.length===0&&<div style={{textAlign:"center",padding:"30px",color:SUB}}><div style={{fontSize:40}}>👤</div><div style={{marginTop:8}}>{t("noClients")}</div></div>}
             {[...filtClients].sort((a,b)=>(b.totalSpent||0)-(a.totalSpent||0)).map((c,idx)=>{
               const realOrders=db.orders.filter(o=>o.clientId===c.id||o.phone===c.phone);
               const realTotal=realOrders.reduce((s,o)=>s+(o.total||0),0);
@@ -1463,9 +1532,9 @@ export default function App(){
                     </div>
                   </div>
                   <div style={{textAlign:"left"}}>
-                    <div style={{fontSize:12,color:"#a78bfa",fontWeight:700}}>{realCount} طلبات</div>
+                    <div style={{fontSize:12,color:"#a78bfa",fontWeight:700}}>{realCount} {t("orderCount")}</div>
                     <div style={{fontSize:13,color:"#10b981",fontWeight:900}}>ج.م {realTotal}</div>
-                    <div style={{fontSize:10,color:MUT}}>معدل: ج.م {realCount?Math.round(realTotal/realCount):0}/طلب</div>
+                    <div style={{fontSize:10,color:MUT}}>{t("avg")} ج.م {realCount?Math.round(realTotal/realCount):0}/{lang==="AR"?"طلب":"order"}</div>
                   </div>
                 </div>
                 {expClient===c.id&&(
@@ -1473,7 +1542,7 @@ export default function App(){
                     {/* Member stats */}
                     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:10}}>
                       {[
-                        ["🛒 طلبات",realCount,"#a78bfa"],
+                        [`🛒 ${t("orders")}`,realCount,"#a78bfa"],
                         ["💰 إجمالي",`ج.م ${realTotal}`,"#10b981"],
                         ["📊 معدل",`ج.م ${realCount?Math.round(realTotal/realCount):0}`,"#f59e0b"],
                       ].map(([l,v,col])=>(
@@ -1492,7 +1561,7 @@ export default function App(){
                       const top=Object.entries(prodTotals).sort(([,a],[,b])=>b-a).slice(0,3);
                       return top.length>0?(
                         <div style={{marginBottom:10}}>
-                          <div style={{fontSize:11,color:MUT,marginBottom:5,fontWeight:700}}>🏆 الأصناف المفضلة</div>
+                          <div style={{fontSize:11,color:MUT,marginBottom:5,fontWeight:700}}>{t("topItems")}</div>
                           {top.map(([id,qty])=>{const p=products.find(x=>x.id===id);return p?(<div key={id} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"3px 0",borderBottom:`1px solid ${BDR}`}}><span>{p.emoji} {p.name}</span><span style={{color:"#f59e0b",fontWeight:700}}>× {qty}</span></div>):null;})}
                         </div>
                       ):null;
@@ -1507,7 +1576,7 @@ export default function App(){
                       if(!clientOrders.length)return null;
                       return(
                         <div style={{marginBottom:10}}>
-                          <div style={{fontSize:11,color:MUT,marginBottom:8,fontWeight:700}}>📋 الطلبات السابقة ({clientOrders.length})</div>
+                          <div style={{fontSize:11,color:MUT,marginBottom:8,fontWeight:700}}>{`📋 ${t("pastOrders").slice(3)} (${clientOrders.length})`}</div>
                           {clientOrders.map(o=>(
                             <div key={o.id} style={{background:BG,borderRadius:10,padding:"10px 12px",marginBottom:6,border:`1px solid ${BDR}`}}>
                               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
@@ -1519,7 +1588,7 @@ export default function App(){
                                 </div>
                                 <div style={{textAlign:"left"}}>
                                   <div style={{fontWeight:900,fontSize:13,color:"#f59e0b"}}>ج.م {o.total}</div>
-                                  <span style={{background:`${ST_COLOR[o.status]||"#374151"}22`,color:ST_COLOR[o.status]||"#94a3b8",border:`1px solid ${ST_COLOR[o.status]||"#374151"}44`,borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:700}}>{ST_ICON[o.status]} {o.status}</span>
+                                  <span style={{background:`${ST_COLOR[o.status]||"#374151"}22`,color:ST_COLOR[o.status]||"#94a3b8",border:`1px solid ${ST_COLOR[o.status]||"#374151"}44`,borderRadius:20,padding:"1px 7px",fontSize:9,fontWeight:700}}>{ST_ICON[o.status]} {tSt(o.status)}</span>
                                 </div>
                               </div>
                               {/* Order items */}
@@ -1541,7 +1610,7 @@ export default function App(){
                       );
                     })()}
 
-                    {tabs.includes("new")&&<button onClick={e=>{e.stopPropagation();setForm(f=>({...f,client:c.name,phone:c.phone,address:c.address,notes:c.notes,memberSearch:""}));setMatchedC(c);setMemberHint(c);setOMode("manual");setView("new");T(`📋 ${c.name}`);}} style={{...css.btn("#d97706","#000"),marginTop:0}}>➕ طلب جديد</button>}
+                    {tabs.includes("new")&&<button onClick={e=>{e.stopPropagation();setForm(f=>({...f,client:c.name,phone:c.phone,address:c.address,notes:c.notes,memberSearch:""}));setMatchedC(c);setMemberHint(c);setOMode("manual");setView("new");T(`📋 ${c.name}`);}} style={{...css.btn("#d97706","#000"),marginTop:0}}>{t("newOrder")}</button>}
 
                     {/* Manager: reset client stats */}
                     {role==="manager"&&(
@@ -1552,7 +1621,7 @@ export default function App(){
                           T("🗑️ تم مسح الإحصائيات");
                         }
                       }} style={{...css.btn("#ef4444","#fff"),marginTop:6,width:"100%"}}>
-                        🗑️ مسح الإحصائيات
+                        {t("resetStats")}
                       </button>
                     )}
 
@@ -1576,7 +1645,7 @@ export default function App(){
                           T("✅ تم تحديث بيانات العميل");
                         }else{T("⚠️ الطلب ليس به عنوان");}
                       }} style={{...css.btn("#2563eb","#fff"),width:"100%",marginTop:6}}>
-                        🔄 تحديث العنوان من آخر طلب
+                        {t("updateAddress")}
                       </button>
                     )}
                   </div>
@@ -1593,31 +1662,31 @@ export default function App(){
             {/* Save / Edit bar */}
             <div style={{display:"flex",gap:8,marginBottom:12,alignItems:"center"}}>
               <div style={{flex:1,fontSize:12,color:costsEditing?"#f59e0b":MUT,fontWeight:700}}>
-                {costsEditing?"✏️ وضع التعديل — عدّل ثم احفظ":"👁️ وضع العرض"}
+                {costsEditing?t("editMode"):t("viewMode")}
               </div>
               {costsEditing
                 ?<>
                   <button onClick={()=>saveCotsToFirebase(activeCostsDB)}
                     disabled={costsSaving}
                     style={{...css.btn("#10b981","#fff"),padding:"7px 14px",fontSize:12}}>
-                    {costsSaving?"⏳ جاري الحفظ...":"💾 حفظ"}
+                    {costsSaving?t("saving"):t("saveBtn")}
                   </button>
                   <button onClick={()=>{setCostsEditing(false);setCostsDB(db.costsDB||loadCostsDB());}}
                     style={{...css.btn("#374151","#fff"),padding:"7px 14px",fontSize:12}}>
-                    إلغاء
+                    {t("cancel")}
                   </button>
                 </>
                 :<button onClick={()=>setCostsEditing(true)}
                   style={{...css.btn("#1d4ed8","#fff"),padding:"7px 14px",fontSize:12}}>
-                  ✏️ تعديل
+                  {t("editBtn")}
                 </button>
               }
             </div>
             {/* Profit summary at top */}
             <div style={{background:"linear-gradient(135deg,#1a2035,#0f1824)",border:`2px solid ${profit>=0?"#10b981":"#ef4444"}44`,borderRadius:16,padding:14,marginBottom:12}}>
-              <div style={{fontWeight:900,fontSize:13,marginBottom:10,color:"#f59e0b"}}>📊 ملخص الربح — {costsSel?.name||"الدورة الحالية"}</div>
+              <div style={{fontWeight:900,fontSize:13,marginBottom:10,color:"#f59e0b"}}>{`📊 ${t("profitSummary").slice(3)} — `}{costsSel?.name||"الدورة الحالية"}</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:8}}>
-                {[["💰 إيراد",revenue,"#10b981"],["📉 تكاليف",GRAND,"#ef4444"],["📈 ربح",Math.abs(profit),profit>=0?"#10b981":"#ef4444"],["📦 ربح/كيلو",profitPerKg,profitPerKg>=0?"#10b981":"#ef4444"]].map(([l,v,c])=>(
+                {[[[`💰 ${t("revenueLabel").slice(3)}`,revenue,"#10b981"],[`📉 ${t("costsLbl").slice(3)}`,GRAND,"#ef4444"],[`📈 ${t("profitLbl").slice(3)}`,Math.abs(profit),profit>=0?"#10b981":"#ef4444"],[`📦 ${t("profitPerKg").slice(3)}`,profitPerKg,profitPerKg>=0?"#10b981":"#ef4444"]]].map(([l,v,c])=>(
                   <div key={l} style={{background:BG,borderRadius:9,padding:"8px",textAlign:"center"}}>
                     <div style={{fontSize:15,fontWeight:900,color:c}}>{typeof v==="number"?`ج.م ${isNaN(v)?"0":v.toFixed(0)}`:v}</div>
                     <div style={{fontSize:10,color:MUT,marginTop:1}}>{l}</div>
@@ -1625,7 +1694,7 @@ export default function App(){
                 ))}
               </div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:BG,borderRadius:9,padding:"8px 12px"}}>
-                <span style={{fontSize:12,color:MUT}}>⚖️ متوسط وزن الطائر (كجم)</span>
+                <span style={{fontSize:12,color:MUT}}>{t("avgWeight")}</span>
                 <input type="number" step="0.1" style={{width:50,background:"transparent",border:"none",borderBottom:"1px solid #252d3d",color:"#f59e0b",fontWeight:900,fontSize:14,textAlign:"center",outline:"none",fontFamily:"'Cairo',sans-serif"}}
                   value={db.avgWeight||2} onChange={e=>mutate(d=>({...d,avgWeight:parseFloat(e.target.value)||2}))}/>
               </div>
@@ -1633,7 +1702,7 @@ export default function App(){
 
             {/* Costs sub-nav */}
             <div style={{display:"flex",background:"#0f1420",borderRadius:12,marginBottom:12,border:"1px solid #252d3d",overflow:"hidden"}}>
-              {[["cycles","📋","الدورات"],["entry","✏️","إدخال التكاليف"],["compare","📊","مقارنة"]].map(([v,ic,lb])=>(
+              {[[t("cyclesTab").split(" ")[0],"📋",t("cyclesTab").slice(3)],[t("costEntry").split(" ")[0],"✏️",t("costEntry").slice(3)],[t("compareTab").split(" ")[0],"📊",t("compareTab").slice(3)]].map(([v,ic,lb])=>(
                 <button key={v} onClick={()=>setCostsView(v)} style={{flex:1,padding:"9px 2px",border:"none",background:"none",color:costsView===v?"#f59e0b":"#64748b",fontWeight:costsView===v?800:400,borderBottom:costsView===v?"3px solid #f59e0b":"3px solid transparent",cursor:"pointer",fontSize:10,fontFamily:"'Cairo',sans-serif"}}>
                   <div style={{fontSize:13}}>{ic}</div><div>{lb}</div>
                 </button>
@@ -1644,7 +1713,7 @@ export default function App(){
             {costsView==="cycles"&&(
               <div>
                 <button style={{...css.btn("#f59e0b","#000"),marginBottom:12}} onClick={()=>setCostsShowNew(!costsShowNew)}>
-                  {costsShowNew?"✕ إلغاء":"➕ إنشاء دورة تكاليف جديدة"}
+                  {costsShowNew?t("cancelBtn"):t("newCycle")}
                 </button>
                 {costsShowNew&&(
                   <div style={{...css.card,border:"2px solid #f59e0b55",marginBottom:12}}>
@@ -1715,11 +1784,11 @@ export default function App(){
                   <div style={{display:"flex",gap:8}}>
                     <div style={{flex:1,background:BG,borderRadius:9,padding:"9px",textAlign:"center"}}>
                       <div style={{fontSize:16,fontWeight:900,color:"#ef4444"}}>ج.م {CFMT(GRAND)}</div>
-                      <div style={{fontSize:10,color:MUT}}>إجمالي التكاليف</div>
+                      <div style={{fontSize:10,color:MUT}}>{t("totalCosts")}</div>
                     </div>
                     <div style={{flex:1,background:BG,borderRadius:9,padding:"9px",textAlign:"center"}}>
                       <div style={{fontSize:16,fontWeight:900,color:"#ef4444"}}>ج.م {(GRAND/costsBirds).toFixed(2)}</div>
-                      <div style={{fontSize:10,color:MUT}}>تكلفة / طائر</div>
+                      <div style={{fontSize:10,color:MUT}}>{t("costPerBird")}</div>
                     </div>
                   </div>
                 </div>
@@ -2076,8 +2145,8 @@ export default function App(){
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
                 <span style={{fontSize:22}}>⚙️</span>
                 <div>
-                  <div style={{fontWeight:900,fontSize:15,color:"#f59e0b"}}>أسعار الدورة #{currentCycle}</div>
-                  <div style={{fontSize:11,color:MUT}}>الأسعار مرتبطة بكل دورة — تتغير مع كل دورة جديدة</div>
+                  <div style={{fontWeight:900,fontSize:15,color:"#f59e0b"}}>{`${t("cyclePrice")} #${currentCycle}`}</div>
+                  <div style={{fontSize:11,color:MUT}}>{t("cyclePriceNote")}</div>
                 </div>
               </div>
               {/* Cycle switcher for prices */}
@@ -2086,7 +2155,7 @@ export default function App(){
                   <button key={i+1}
                     onClick={()=>mutate(d=>({...d,cycle:i+1}))}
                     style={{...css.sm(currentCycle===i+1?"#d97706":"#1a2035"),border:`1px solid ${currentCycle===i+1?"#d97706":BDR}`,flexShrink:0,padding:"5px 12px"}}>
-                    دورة #{i+1}
+                    {`${t("cycleLabel")} #${i+1}`}
                   </button>
                 ))}
               </div>
@@ -2111,7 +2180,7 @@ export default function App(){
                       </div>
                       <span style={{fontSize:18}}>{p.emoji}</span>
                       <div style={{fontWeight:600,fontSize:13,color:enabled?TXT:MUT}}>{p.name}</div>
-                      {!enabled&&<span style={{fontSize:10,color:"#ef4444",fontWeight:700}}>مخفي</span>}
+                      {!enabled&&<span style={{fontSize:10,color:"#ef4444",fontWeight:700}}>{t("hidden")}</span>}
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
                       {changed&&<span style={{fontSize:10,color:"#f59e0b",fontWeight:700}}>✏️</span>}
@@ -2133,21 +2202,21 @@ export default function App(){
             {Object.keys(priceEdits).length>0&&(
               <div className="fd">
                 <div style={{background:"#f59e0b11",border:"1px solid #f59e0b44",borderRadius:12,padding:"10px 14px",marginBottom:10,fontSize:12,color:"#f59e0b",fontWeight:700,textAlign:"center"}}>
-                  ✏️ لديك {Object.keys(priceEdits).length} تعديل غير محفوظ
+                  {`✏️ ${Object.keys(priceEdits).length} ${t("unsavedEdits")}`}
                 </div>
                 <div style={{display:"flex",gap:8}}>
-                  <button style={{...css.btn("#374151","#fff"),flex:1,marginTop:0}} onClick={()=>setPriceEdits({})}>↩ إلغاء</button>
-                  <button style={{...css.btn("#d97706","#000"),flex:2,marginTop:0}} onClick={savePrices}>💾 حفظ الأسعار</button>
+                  <button style={{...css.btn("#374151","#fff"),flex:1,marginTop:0}} onClick={()=>setPriceEdits({})}>{t("undoBtn")}</button>
+                  <button style={{...css.btn("#d97706","#000"),flex:2,marginTop:0}} onClick={savePrices}>{t("savePricesBtn")}</button>
                 </div>
               </div>
             )}
 
             {priceSaved&&(
-              <div style={{textAlign:"center",color:"#10b981",fontWeight:700,fontSize:14,padding:"10px",marginTop:4}}>✅ تم حفظ الأسعار بنجاح!</div>
+              <div style={{textAlign:"center",color:"#10b981",fontWeight:700,fontSize:14,padding:"10px",marginTop:4}}>{t("pricesSaved")}</div>
             )}
 
             <div style={{...css.card,borderColor:"#3b82f644",marginTop:8}}>
-              <div style={{fontWeight:800,fontSize:13,marginBottom:8,color:"#3b82f6"}}>📋 الأسعار الحالية</div>
+              <div style={{fontWeight:800,fontSize:13,marginBottom:8,color:"#3b82f6"}}>{t("currentPrices")}</div>
               {products.map(p=>(
                 <div key={p.id} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"5px 0",borderBottom:`1px solid ${BDR}`}}>
                   <span style={{color:MUT}}>{p.emoji} {p.name}</span>
@@ -2161,8 +2230,8 @@ export default function App(){
         {/* ══ STOCK VIEW ══ */}
         {view==="stock"&&(
           <div style={{padding:"14px 12px"}}>
-            <div style={{fontWeight:800,fontSize:15,color:"#f59e0b",marginBottom:4}}>📦 المخزن</div>
-            <div style={{fontSize:11,color:MUT,marginBottom:14}}>حدد الكمية المتاحة — التطبيق بيطرح الطلبات النشطة تلقائياً</div>
+            <div style={{fontWeight:800,fontSize:15,color:"#f59e0b",marginBottom:4}}>{t("stockTitle")}</div>
+            <div style={{fontSize:11,color:MUT,marginBottom:14}}>{t("stockNote")}</div>
 
             {products.map(p=>{
               const stockQty=db.stock?.[p.id]||0;
@@ -2184,7 +2253,7 @@ export default function App(){
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
                     {/* Stock input with +/- */}
                     <div style={{background:"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
-                      <div style={{fontSize:9,color:MUT,marginBottom:6}}>المخزن</div>
+                      <div style={{fontSize:9,color:MUT,marginBottom:6}}>{t("stockCol")}</div>
                       <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
                         <button onClick={()=>mutate(d=>({...d,stock:{...(d.stock||{}),[p.id]:Math.max(0,(d.stock?.[p.id]||0)-1)}}))}
                           style={{width:24,height:24,borderRadius:6,border:"none",background:"#374151",color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}}>−</button>
@@ -2199,13 +2268,13 @@ export default function App(){
 
                     {/* Ordered */}
                     <div style={{background:"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
-                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>طلبات نشطة</div>
+                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>{t("activeOrdersCol")}</div>
                       <div style={{fontSize:20,fontWeight:900,color:"#f97316"}}>{ordered}</div>
                     </div>
 
                     {/* Remaining */}
                     <div style={{background:outOfStock?"#7c2d1233":"#1a2035",borderRadius:8,padding:"8px",textAlign:"center"}}>
-                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>المتبقي</div>
+                      <div style={{fontSize:9,color:MUT,marginBottom:4}}>{t("remainingCol")}</div>
                       <div style={{fontSize:20,fontWeight:900,color:stockQty===0?"#64748b":outOfStock?"#ef4444":remaining<=3?"#f59e0b":"#10b981"}}>
                         {stockQty===0?"—":remaining}
                       </div>
@@ -2214,7 +2283,7 @@ export default function App(){
 
                   {outOfStock&&(
                     <div style={{marginTop:8,textAlign:"center",fontSize:11,color:"#ef4444",fontWeight:700}}>
-                      ⚠️ نفد المخزون — اقفل الصنف من الأسعار
+                      {t("outOfStockMsg")}
                     </div>
                   )}
                 </div>
@@ -2228,12 +2297,12 @@ export default function App(){
   );
 }
 
-function CodeConfirm({order,onConfirm}){
+function CodeConfirm({order,onConfirm,lang}){
   const [code,setCode]=useState("");
   return(
     <div style={{background:"#10b98111",border:"1px solid #10b98144",borderRadius:10,padding:"12px 14px"}}>
-      <div style={{fontWeight:800,fontSize:13,color:"#10b981",marginBottom:6}}>✅ تأكيد التسليم من العميل</div>
-      <div style={{fontSize:12,color:"#94a3b8",marginBottom:10}}>أدخل الكود اللي أعطاك إياه العميل</div>
+      <div style={{fontWeight:800,fontSize:13,color:"#10b981",marginBottom:6}}>{lang==="AR"?"✅ تأكيد التسليم من العميل":"✅ Delivery Confirmation"}</div>
+      <div style={{fontSize:12,color:"#94a3b8",marginBottom:10}}>{lang==="AR"?"أدخل الكود اللي أعطاك إياه العميل":"Enter the code the client gave you"}</div>
       <div style={{display:"flex",gap:8}}>
         <input
           style={{flex:1,background:"#0d1117",border:"1px solid #252d3d",borderRadius:9,padding:"12px",color:"#f1f5f9",fontSize:22,fontWeight:900,fontFamily:"monospace",textAlign:"center",outline:"none",letterSpacing:8,boxSizing:"border-box"}}
@@ -2245,17 +2314,17 @@ function CodeConfirm({order,onConfirm}){
           onClick={()=>onConfirm(code)}
           disabled={code.length!==4}
           style={{background:code.length===4?"#10b981":"#1a2035",color:"#fff",border:"none",borderRadius:9,padding:"0 16px",fontWeight:800,fontSize:13,fontFamily:"'Cairo',sans-serif",cursor:code.length===4?"pointer":"default",flexShrink:0}}>
-          ✅ تأكيد
+          {lang==="AR"?"✅ تأكيد":"✅ Confirm"}
         </button>
       </div>
     </div>
   );
 }
 
-function DeliveryDateField({form,setForm,css}){
+function DeliveryDateField({form,setForm,css,lang}){
   return(
     <div style={{background:"#1a2035",borderRadius:14,padding:"12px 16px",marginBottom:10,border:"1px solid #252d3d"}}>
-      <div style={{fontWeight:800,fontSize:13,color:"#f59e0b",marginBottom:8}}>📅 تاريخ الاستلام</div>
+      <div style={{fontWeight:800,fontSize:13,color:"#f59e0b",marginBottom:8}}>{lang==="AR"?"📅 تاريخ الاستلام":"📅 Pickup Date"}</div>
       <input
         style={{...css.inp,marginBottom:0}}
         type="date"
@@ -2264,14 +2333,14 @@ function DeliveryDateField({form,setForm,css}){
       />
       {form.deliveryDate&&(
         <div style={{fontSize:11,color:"#10b981",marginTop:6,fontWeight:700}}>
-          ✅ موعد الاستلام: {new Date(form.deliveryDate).toLocaleDateString("ar-EG",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}
+          {lang==="AR"?"✅ موعد الاستلام:":"✅ Pickup scheduled:"} {new Date(form.deliveryDate).toLocaleDateString("ar-EG",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}
         </div>
       )}
     </div>
   );
 }
 
-function OrderForm({form,setForm,setQty,products,showClient}){
+function OrderForm({form,setForm,setQty,products,showClient,lang}){
   const BDR="#252d3d",MUT="#94a3b8",BG="#0d1117",CARD="#1a2035";
   const [mapOpen,setMapOpen]=useState(false);
   const [locSet,setLocSet]=useState(false);
@@ -2324,9 +2393,9 @@ function OrderForm({form,setForm,setQty,products,showClient}){
   return(
     <div>
       <div style={{background:CARD,borderRadius:14,padding:"14px 16px",marginBottom:10,border:`1px solid ${BDR}`}}>
-        <div style={{fontWeight:800,fontSize:13,color:"#f59e0b",marginBottom:10}}>👤 بيانات العميل</div>
+        <div style={{fontWeight:800,fontSize:13,color:"#f59e0b",marginBottom:10}}>{lang==="AR"?"👤 بيانات العميل":"👤 Client Info"}</div>
 
-        <label style={lbl}>الاسم *</label>
+        <label style={lbl}>{lang==="AR"?"الاسم *":"Name *"}</label>
         {/* Prefix selector */}
         <div style={{display:"flex",gap:5,marginBottom:6,flexWrap:"wrap"}}>
           {["Mr.","Mrs.","Ms.","Dr.","Eng.","Prof."].map(p=>(
@@ -2336,9 +2405,9 @@ function OrderForm({form,setForm,setQty,products,showClient}){
             </button>
           ))}
         </div>
-        <input style={inpStyle("client")} placeholder="الاسم" value={form.client||""} onChange={e=>{setForm(f=>({...f,client:e.target.value}));setErrors(r=>({...r,client:false}));}}/>
+        <input style={inpStyle("client")} placeholder={lang==="AR"?"الاسم":"Name"} value={form.client||""} onChange={e=>{setForm(f=>({...f,client:e.target.value}));setErrors(r=>({...r,client:false}));}}/>
 
-        <label style={lbl}>الهاتف *</label>
+        <label style={lbl}>{lang==="AR"?"الهاتف *":"Phone *"}</label>
         <input style={inpStyle("phone")} value={form.phone||""} onChange={e=>{setForm(f=>({...f,phone:e.target.value}));setErrors(r=>({...r,phone:false}));}}/>
 
         {/* MAP TOGGLE */}
@@ -2347,8 +2416,8 @@ function OrderForm({form,setForm,setQty,products,showClient}){
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:20}}>🗺️</span>
             <div style={{textAlign:"right"}}>
-              <div style={{fontWeight:700,fontSize:13,color:locSet?"#10b981":"#f1f5f9"}}>{locSet?"✅ تم تحديد الموقع":"تحديد موقعك على الخريطة"}</div>
-              <div style={{fontSize:10,color:MUT}}>اختياري</div>
+              <div style={{fontWeight:700,fontSize:13,color:locSet?"#10b981":"#f1f5f9"}}>{locSet?(lang==="AR"?"✅ تم تحديد الموقع":"✅ Location set"):(lang==="AR"?"تحديد موقعك على الخريطة":"Set location on map")}</div>
+              <div style={{fontSize:10,color:MUT}}>{lang==="AR"?"اختياري":"Optional"}</div>
             </div>
           </div>
           <span style={{color:MUT}}>{mapOpen?"▲":"▼"}</span>
@@ -2360,21 +2429,21 @@ function OrderForm({form,setForm,setQty,products,showClient}){
             <div style={{padding:"8px 10px",background:"#0a0f1a",display:"flex",gap:8}}>
               <button onClick={getUserLocation}
                 style={{flex:1,background:"#1e3a5f",color:"#60a5fa",border:"none",borderRadius:8,padding:"9px",fontWeight:700,fontSize:12,fontFamily:"'Cairo',sans-serif",cursor:"pointer"}}>
-                📍 موقعي الحالي
+                {lang==="AR"?"📍 موقعي الحالي":"📍 My Location"}
               </button>
               {locSet&&(
                 <button onClick={()=>setMapOpen(false)}
                   style={{flex:1,background:"#10b981",color:"#fff",border:"none",borderRadius:8,padding:"9px",fontWeight:800,fontSize:12,fontFamily:"'Cairo',sans-serif",cursor:"pointer"}}>
-                  📍 هذا موقعي ✅
+                  {lang==="AR"?"📍 هذا موقعي ✅":"📍 This is my location ✅"}
                 </button>
               )}
             </div>
-            <div style={{fontSize:10,color:MUT,textAlign:"center",padding:"4px",background:"#0a0f1a"}}>اضغط على الخريطة أو اسحب الـ Pin</div>
+            <div style={{fontSize:10,color:MUT,textAlign:"center",padding:"4px",background:"#0a0f1a"}}>{lang==="AR"?"اضغط على الخريطة أو اسحب الـ Pin":"Tap the map or drag the Pin"}</div>
           </div>
         )}
 
         {/* GOVERNORATE */}
-        <label style={lbl}>المحافظة *</label>
+        <label style={lbl}>{lang==="AR"?"المحافظة *":"Governorate *"}</label>
         <div style={{display:"flex",gap:6,marginBottom:8}}>
           {Object.keys(AREAS).map(g=>(
             <button key={g} onClick={()=>setForm(f=>f.gov===g?{...f,gov:"",area:""}:{...f,gov:g,area:""})}
@@ -2414,35 +2483,35 @@ function OrderForm({form,setForm,setQty,products,showClient}){
               ))}
             </div>
 
-            <label style={lbl}>اسم العمارة *</label>
+            <label style={lbl}>{lang==="AR"?"اسم العمارة *":"Building *"}</label>
             <input style={inpStyle("building")} placeholder="مثال: عمارة النيل" value={form.building||""} onChange={e=>{setForm(f=>({...f,building:e.target.value}));setErrors(r=>({...r,building:false}));}}/>
 
             <div style={{display:"flex",gap:8,marginBottom:8}}>
               <div style={{flex:1}}>
-                <label style={lbl}>رقم الشقة *</label>
+                <label style={lbl}>{lang==="AR"?"رقم الشقة *":"Apt # *"}</label>
                 <input style={{...inpStyle("aptNum"),marginBottom:0}} placeholder="٣" value={form.aptNum||""} onChange={e=>{setForm(f=>({...f,aptNum:e.target.value}));setErrors(r=>({...r,aptNum:false}));}}/>
               </div>
               <div style={{flex:1}}>
-                <label style={lbl}>الدور (اختياري)</label>
+                <label style={lbl}>{lang==="AR"?"الدور (اختياري)":"Floor (optional)"}</label>
                 <input style={{...inpStyle(),marginBottom:0}} placeholder="٢" value={form.floor||""} onChange={e=>setForm(f=>({...f,floor:e.target.value}))}/>
               </div>
             </div>
             <div style={{height:8}}/>
 
-            <label style={lbl}>الشارع *</label>
+            <label style={lbl}>{lang==="AR"?"الشارع *":"Street *"}</label>
             <input style={inpStyle("street")} placeholder="مثال: شارع الجمهورية" value={form.street||""} onChange={e=>{setForm(f=>({...f,street:e.target.value}));setErrors(r=>({...r,street:false}));}}/>
 
-            <label style={lbl}>ملاحظات إضافية (اختياري)</label>
+            <label style={lbl}>{lang==="AR"?"ملاحظات إضافية (اختياري)":"Additional notes (optional)"}</label>
             <input style={inpStyle()} placeholder="أي تفاصيل..." value={form.details||""} onChange={e=>setForm(f=>({...f,details:e.target.value}))}/>
           </>
         )}
 
-        <label style={lbl}>ملاحظات الطلب</label>
+        <label style={lbl}>{lang==="AR"?"ملاحظات الطلب":"Order notes"}</label>
         <input style={inpStyle()} value={form.notes||""} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/>
       </div>
 
       <div style={{background:CARD,borderRadius:14,padding:"14px 16px",marginBottom:10,border:`1px solid ${BDR}`}}>
-        <div style={{fontWeight:800,fontSize:13,color:"#f59e0b",marginBottom:10}}>🛒 الأصناف</div>
+        <div style={{fontWeight:800,fontSize:13,color:"#f59e0b",marginBottom:10}}>{lang==="AR"?"🛒 الأصناف":"🛒 Items"}</div>
         {products.map(p=>(
           <div key={p.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,padding:"9px 12px",background:BG,borderRadius:10,border:(form.items[p.id]||0)>0?"1px solid #d97706":`1px solid ${BDR}`}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -2458,7 +2527,7 @@ function OrderForm({form,setForm,setQty,products,showClient}){
         ))}
         {itemTotal>0&&(
           <div style={{background:"#d9770622",border:"1px solid #d97706",borderRadius:10,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontWeight:700}}>الإجمالي</span>
+            <span style={{fontWeight:700}}>{lang==="AR"?"الإجمالي":"Total"}</span>
             <span style={{fontWeight:900,fontSize:17,color:"#f59e0b"}}>ج.م {itemTotal}</span>
           </div>
         )}
