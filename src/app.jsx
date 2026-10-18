@@ -25,17 +25,17 @@ const GOV_COLORS={"القاهرة":"#f59e0b","الجيزة":"#10b981","القا�
 
 
 const DEFAULT_PRODUCTS = [
-  { id:"whole",         name:"فرخة كاملة",          emoji:"🐔", price:190, pricePerKg:190, byWeight:true },
-  { id:"shamoort",      name:"شامورت (750-1000 جم)",  emoji:"🐣", price:150 },
-  { id:"breast_deb",    name:"صدور مخلية ك",         emoji:"🥩", price:390 },
-  { id:"fillet",        name:"صدور فيليه ك",         emoji:"🥩", price:390 },
-  { id:"wings",         name:"وراك كاملة ك",         emoji:"🍗", price:190 },
-  { id:"tips",          name:"دبوس ك",               emoji:"🍖", price:275 },
-  { id:"shish",         name:"شيش طاوق بدون دهون ك", emoji:"🍢", price:390 },
-  { id:"shawarma",      name:"شاورمة بدون دهون ك",   emoji:"🌯", price:390 },
-  { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",  emoji:"🍗", price:190 },
-  { id:"liver",         name:"كبدة ك",               emoji:"🫀", price:80  },
-  { id:"gizzard",       name:"قوانص ك",              emoji:"🫁", price:70  },
+  { id:"whole",         name:"فرخة كاملة (1600-1800 جم)",          emoji:"🐔", price:190, pricePerKg:190, byWeight:true },
+  { id:"shamoort",      name:"فرخة صغيرة (شامورت) (750-1000 جم)",  emoji:"🐣", price:140 },
+  { id:"breast_deb",    name:"صدور مخلية بدون دهون",               emoji:"🥩", price:390 },
+  { id:"fillet",        name:"صدور فيليه (بانيه) بدون دهون",        emoji:"🥓", price:390 },
+  { id:"wings",         name:"وراك كاملة",                         emoji:"🍗", price:190 },
+  { id:"tips",          name:"دبابيس (كينتاكي)",                   emoji:"🍖", price:275 },
+  { id:"shish",         name:"شيش طاوق بدون دهون",                 emoji:"🍢", price:390 },
+  { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",                 emoji:"🍗", price:150 },
+  { id:"shawarma",      name:"شاورمة بدون دهون",                   emoji:"🌯", price:390 },
+  { id:"liver",         name:"كبدة ك",                             emoji:"🫀", price:190 },
+  { id:"gizzard",       name:"قوانص ك",                            emoji:"🫁", price:70  },
 ];
 
 const ST_FLOW  = ["جديد","قيد التحضير","جاهز","في الطريق","تم التسليم","تم الدفع"];
@@ -69,7 +69,7 @@ AR:{
   stockLabel:"المخزن",gifts:"هدايا",totalOrders:"إجمالي الطلبات",all:"الكل",
   giftsTitle:"الهدايا",giftsNote:"زيادة الهدايا بتتخصم من المخزن تلقائياً",stockColon:"مخزن:",
   inventoryTitle:"الأصناف المطلوب تحضيرها",noActiveOrders:"لا توجد طلبات قيد التحضير",
-  noMembership:"{t("noMembership")}",pickup:"استلام:",orderTime:"وقت الطلب",memberId:"رقم العضوية",copyAddress:"نسخ العنوان",openMap:"فتح الموقع",
+  noMembership:"بدون عضوية",pickup:"استلام:",orderTime:"وقت الطلب",memberId:"رقم العضوية",copyAddress:"نسخ العنوان",openMap:"فتح الموقع",
   discount:"خصم %",cancel:"إلغاء",total:"الإجمالي",savedEGP:"وفّرت ج.م",estimated:"(تقديري)",
   editOrder:"تعديل الطلب",newTotal:"الإجمالي الجديد",save:"✅ حفظ",deleteOrder:"🗑️ مسح الطلب",
   sendDelivery:"إرسال للتوصيل + كود للعميل",confirmCode:"كود التأكيد",recordPayment:"تسجيل الدفع",cash:"كاش",vodafone:"فودافون كاش",instapay:"انستاباي",
