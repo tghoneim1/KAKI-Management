@@ -794,7 +794,7 @@ export default function App(){
             <div style={{display:"flex",gap:8,marginBottom:12}}>
               <div style={css.stat("#10b981")}><div style={{fontSize:15,fontWeight:900,color:"#10b981"}}>ج.م {stats.revenue}</div><div style={{fontSize:11,color:MUT}}>{t("collected")}</div></div>
               <div style={css.stat("#f97316")}><div style={{fontSize:15,fontWeight:900,color:"#f97316"}}>ج.م {stats.pending}</div><div style={{fontSize:11,color:MUT}}>{t("pending")}</div></div>
-              <div style={css.stat(profit>=0?"#10b981":"#ef4444")}><div style={{fontSize:15,fontWeight:900,color:profit>=0?"#10b981":"#ef4444"}}>ج.م {profit}</div><div style={{fontSize:11,color:MUT}}>{profit>=0?profit>=0?t("profit"):t("loss")}</div></div>
+              <div style={css.stat(profit>=0?"#10b981":"#ef4444")}><div style={{fontSize:15,fontWeight:900,color:profit>=0?"#10b981":"#ef4444"}}>ج.م {profit}</div><div style={{fontSize:11,color:MUT}}>{profit>=0?t("profit"):t("loss")}</div></div>
             </div>
             <div style={css.card}>
               <div style={{fontWeight:800,fontSize:13,marginBottom:10}}>{t("pipeline")}</div>
