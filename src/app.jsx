@@ -25,17 +25,17 @@ const GOV_COLORS={"القاهرة":"#f59e0b","الجيزة":"#10b981","القا�
 
 
 const DEFAULT_PRODUCTS = [
-  { id:"whole",         name:"فرخة كاملة (1600-1800 جم)",          emoji:"🐔", price:190, pricePerKg:190, byWeight:true },
-  { id:"shamoort",      name:"فرخة صغيرة (شامورت) (750-1000 جم)",  emoji:"🐣", price:140 },
-  { id:"breast_deb",    name:"صدور مخلية بدون دهون",               emoji:"🥩", price:390 },
-  { id:"fillet",        name:"صدور فيليه (بانيه) بدون دهون",        emoji:"🥓", price:390 },
-  { id:"wings",         name:"وراك كاملة",                         emoji:"🍗", price:190 },
-  { id:"tips",          name:"دبابيس (كينتاكي)",                   emoji:"🍖", price:275 },
-  { id:"shish",         name:"شيش طاوق بدون دهون",                 emoji:"🍢", price:390 },
-  { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",                 emoji:"🍗", price:150 },
-  { id:"shawarma",      name:"شاورمة بدون دهون",                   emoji:"🌯", price:390 },
-  { id:"liver",         name:"كبدة ك",                             emoji:"🫀", price:190 },
-  { id:"gizzard",       name:"قوانص ك",                            emoji:"🫁", price:70  },
+  { id:"whole",         name:"فرخة كاملة (1600-1800 جم)",          nameEN:"Whole Chicken (1600-1800g)",              emoji:"🐔", price:190, pricePerKg:190, byWeight:true },
+  { id:"shamoort",      name:"فرخة صغيرة (شامورت) (750-1000 جم)",  nameEN:"Small Chicken (Shamoot) (750-1000g)",     emoji:"🐣", price:140 },
+  { id:"breast_deb",    name:"صدور مخلية بدون دهون",               nameEN:"Boneless Skinless Breasts (fat removed)", emoji:"🥩", price:390 },
+  { id:"fillet",        name:"صدور فيليه (بانيه) بدون دهون",        nameEN:"Fillet Breasts (Breaded), fat removed",   emoji:"🥓", price:390 },
+  { id:"wings",         name:"وراك كاملة",                         nameEN:"Whole Leg Quarters",                      emoji:"🍗", price:190 },
+  { id:"tips",          name:"دبابيس (كينتاكي)",                   nameEN:"Drumettes (KFC-style)",                   emoji:"🍖", price:275 },
+  { id:"shish",         name:"شيش طاوق بدون دهون",                 nameEN:"Shish Tawook, fat removed",               emoji:"🍢", price:390 },
+  { id:"chicken_wings", name:"أجنحة (تشيكن وينجز)",                 nameEN:"Wings (Chicken Wings)",                   emoji:"🍗", price:150 },
+  { id:"shawarma",      name:"شاورمة بدون دهون",                   nameEN:"Shawarma, fat removed",                   emoji:"🌯", price:390 },
+  { id:"liver",         name:"كبدة ك",                             nameEN:"Liver",                                   emoji:"🫀", price:190 },
+  { id:"gizzard",       name:"قوانص ك",                            nameEN:"Gizzards",                                emoji:"🫁", price:70  },
 ];
 
 const ST_FLOW  = ["جديد","قيد التحضير","جاهز","في الطريق","تم التسليم","تم الدفع"];
@@ -405,6 +405,8 @@ export default function App(){
   const [lang,setLang]=useState("AR");
   const t=k=>TRANS[lang][k]||k;
   const tSt=s=>lang==="EN"?(ST_EN[s]||s):s;
+  const EN_NAMES=Object.fromEntries(DEFAULT_PRODUCTS.map(p=>[p.id,p.nameEN||p.name]));
+  const pName=p=>lang==="EN"?(EN_NAMES[p.id]||p.nameEN||p.name):p.name;
   const [showInventory,setShowInventory]=useState(false);
   const [showStock,setShowStock]=useState(false);
   const [showGifts,setShowGifts]=useState(false);
@@ -979,7 +981,7 @@ export default function App(){
                         return(
                           <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid #3b1f6b"}}>
                             <span style={{fontSize:18}}>{p.emoji}</span>
-                            <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:600}}>{p.name}</div>
+                            <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:600}}>{pName(p)}</div>
                             <div style={{display:"flex",alignItems:"center",gap:4,background:"#2d1657",borderRadius:8,padding:"4px 8px"}}>
                               <button onClick={()=>{
                                 if(giftQty<=0) return;
@@ -1042,7 +1044,7 @@ export default function App(){
                             {/* Product name */}
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                               <span style={{fontSize:18}}>{p.emoji}</span>
-                              <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:700}}>{p.name}</div>
+                              <div style={{flex:1,fontSize:12,color:"#e2e8f0",fontWeight:700}}>{pName(p)}</div>
                               {outOfStock&&<span style={{background:"#ef4444",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:800}}>{t("outOfStock")}</span>}
                             </div>
                             {/* Stock controls + formula */}
@@ -1165,7 +1167,7 @@ export default function App(){
                         const p=products.find(x=>x.id===id);
                         const showPrice=role==="manager"||role==="delivery";
                         return p?(<div key={id} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"4px 0",borderBottom:`1px solid #1a2035`}}>
-                          <span>{p.emoji} {p.name} × {qty}</span>
+                          <span>{p.emoji} {pName(p)} × {qty}</span>
                           {showPrice&&<span style={{color:"#f59e0b",fontWeight:700}}>ج.م {getUnitPrice(p)*qty}{p?.byWeight?" (تقديري)":""}</span>}
                         </div>):null;
                       })}
@@ -1424,7 +1426,7 @@ export default function App(){
                             return(
                               <div key={p.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                                 <span style={{fontSize:14}}>{p.emoji}</span>
-                                <div style={{flex:1,fontSize:11,color:"#e2e8f0"}}>{p.name}</div>
+                                <div style={{flex:1,fontSize:11,color:"#e2e8f0"}}>{pName(p)}</div>
                                 <button onClick={e=>{e.stopPropagation();setEditItems(prev=>({...prev,[p.id]:Math.max(0,(prev[p.id]||0)-1)}));}} style={{width:26,height:26,borderRadius:6,border:"none",background:"#1e3a5f",color:"#fff",cursor:"pointer",fontWeight:700}}>−</button>
                                 <span style={{minWidth:20,textAlign:"center",fontWeight:900,color:qty>0?"#f59e0b":"#64748b"}}>{qty}</span>
                                 <button onClick={e=>{e.stopPropagation();setEditItems(prev=>({...prev,[p.id]:(prev[p.id]||0)+1}));}} style={{width:26,height:26,borderRadius:6,border:"none",background:qty>0?"#d97706":"#1e3a5f",color:"#fff",cursor:"pointer",fontWeight:700}}>+</button>
@@ -1562,7 +1564,7 @@ export default function App(){
                       return top.length>0?(
                         <div style={{marginBottom:10}}>
                           <div style={{fontSize:11,color:MUT,marginBottom:5,fontWeight:700}}>{t("topItems")}</div>
-                          {top.map(([id,qty])=>{const p=products.find(x=>x.id===id);return p?(<div key={id} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"3px 0",borderBottom:`1px solid ${BDR}`}}><span>{p.emoji} {p.name}</span><span style={{color:"#f59e0b",fontWeight:700}}>× {qty}</span></div>):null;})}
+                          {top.map(([id,qty])=>{const p=products.find(x=>x.id===id);return p?(<div key={id} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"3px 0",borderBottom:`1px solid ${BDR}`}}><span>{p.emoji} {pName(p)}</span><span style={{color:"#f59e0b",fontWeight:700}}>× {qty}</span></div>):null;})}
                         </div>
                       ):null;
                     })()}
@@ -1597,7 +1599,7 @@ export default function App(){
                                   const p=products.find(x=>x.id===id);
                                   return p?(
                                     <div key={id} style={{display:"flex",justifyContent:"space-between",fontSize:11,color:MUT,padding:"2px 0"}}>
-                                      <span>{p.emoji} {p.name} × {qty}</span>
+                                      <span>{p.emoji} {pName(p)} × {qty}</span>
                                       <span style={{color:"#f59e0b"}}>ج.م {p.price*qty}</span>
                                     </div>
                                   ):null;
@@ -2118,7 +2120,7 @@ export default function App(){
                   {soldItems.map(p=>(
                     <div key={p.id} style={{background:BG,borderRadius:10,padding:"10px 12px",marginBottom:8,border:`1px solid ${p.itemProfit>=0?"#10b98133":"#ef444433"}`}}>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-                        <span style={{fontWeight:800,fontSize:13}}>{p.emoji} {p.name}</span>
+                        <span style={{fontWeight:800,fontSize:13}}>{p.emoji} {pName(p)}</span>
                         <span style={{fontWeight:900,fontSize:14,color:p.itemProfit>=0?"#10b981":"#ef4444"}}>{p.itemProfit>=0?"+":""}ج.م {Math.round(p.itemProfit).toLocaleString()}</span>
                       </div>
                       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:4}}>
@@ -2179,7 +2181,7 @@ export default function App(){
                         <div style={{position:"absolute",top:2,left:enabled?18:2,width:16,height:16,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
                       </div>
                       <span style={{fontSize:18}}>{p.emoji}</span>
-                      <div style={{fontWeight:600,fontSize:13,color:enabled?TXT:MUT}}>{p.name}</div>
+                      <div style={{fontWeight:600,fontSize:13,color:enabled?TXT:MUT}}>{pName(p)}</div>
                       {!enabled&&<span style={{fontSize:10,color:"#ef4444",fontWeight:700}}>{t("hidden")}</span>}
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -2219,7 +2221,7 @@ export default function App(){
               <div style={{fontWeight:800,fontSize:13,marginBottom:8,color:"#3b82f6"}}>{t("currentPrices")}</div>
               {products.map(p=>(
                 <div key={p.id} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"5px 0",borderBottom:`1px solid ${BDR}`}}>
-                  <span style={{color:MUT}}>{p.emoji} {p.name}</span>
+                  <span style={{color:MUT}}>{p.emoji} {pName(p)}</span>
                   <span style={{fontWeight:700,color:"#f59e0b"}}>ج.م {p.price}</span>
                 </div>
               ))}
@@ -2244,7 +2246,7 @@ export default function App(){
                   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                     <span style={{fontSize:22}}>{p.emoji}</span>
                     <div style={{flex:1}}>
-                      <div style={{fontWeight:700,fontSize:13,color:TXT}}>{p.name}</div>
+                      <div style={{fontWeight:700,fontSize:13,color:TXT}}>{pName(p)}</div>
                       <div style={{fontSize:10,color:MUT}}>ج.م {p.price} / {p.unit||"كج"}</div>
                     </div>
                     {outOfStock&&<span style={{background:"#ef4444",color:"#fff",borderRadius:6,padding:"3px 8px",fontSize:11,fontWeight:800}}>⚠️ نفد</span>}
@@ -2516,7 +2518,7 @@ function OrderForm({form,setForm,setQty,products,showClient,lang}){
           <div key={p.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,padding:"9px 12px",background:BG,borderRadius:10,border:(form.items[p.id]||0)>0?"1px solid #d97706":`1px solid ${BDR}`}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <span style={{fontSize:18}}>{p.emoji}</span>
-              <div><div style={{fontWeight:700,fontSize:12}}>{p.name}</div><div style={{fontSize:11,color:"#f59e0b"}}>ج.م {p.price}</div></div>
+              <div><div style={{fontWeight:700,fontSize:12}}>{pName(p)}</div><div style={{fontSize:11,color:"#f59e0b"}}>ج.م {p.price}</div></div>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:5}}>
               <button onClick={()=>setQty(p.id,(form.items[p.id]||0)-1)} style={{width:28,height:28,borderRadius:7,border:"none",background:"#374151",color:"#fff",fontSize:16,cursor:"pointer",fontWeight:700}}>−</button>
