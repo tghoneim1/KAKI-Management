@@ -36,6 +36,8 @@ const DEFAULT_PRODUCTS = [
   { id:"shawarma",      name:"شاورمة بدون دهون",                   nameEN:"Shawarma, fat removed",                   emoji:"🌯", price:390 },
   { id:"liver",         name:"كبدة ك",                             nameEN:"Liver",                                   emoji:"🫀", price:190 },
   { id:"gizzard",       name:"قوانص ك",                            nameEN:"Gizzards",                                emoji:"🫁", price:70  },
+  { id:"minced",        name:"فراخ مفرومة",                        nameEN:"Chicken Minced",                          emoji:"🥩", price:390 },
+  { id:"strips",        name:"استريبس",                            nameEN:"Chicken Strips",                          emoji:"🍗", price:390 },
 ];
 
 const ST_FLOW  = ["جديد","قيد التحضير","جاهز","في الطريق","تم التسليم","تم الدفع"];
